@@ -4,6 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.hse12pi.geneticApproach.neuralnetwork.GeneticTrainedNetwork;
+import com.hse12pi.geneticApproach.neuralnetwork.NeuralNetwork;
+import com.hse12pi.geneticApproach.neuralnetwork.Threshold;
 
 public class NetworkDrivenAgent extends Agent{
 
@@ -21,9 +24,16 @@ public class NetworkDrivenAgent extends Agent{
 
 	private static final double FOOD = 10;
 	
+	//neural network needed vars
+	private volatile NeuralNetwork brain;
+	
 	public NetworkDrivenAgent(double x, double y, double angle) {
 		super(x, y, angle);
 		// TODO Auto-generated constructor stub
+	}
+	
+	public synchronized void setBrain(NeuralNetwork brain) {
+		this.brain = brain;
 	}
 	public synchronized void interact(AgentsEnvironment env) {
 		
@@ -90,6 +100,30 @@ public class NetworkDrivenAgent extends Agent{
 			angle = sign * (abs - (Math.floor(abs / maxDeltaAngle) * maxDeltaAngle));
 		}
 		return angle;
+	}
+	
+	public static GeneticTrainedNetwork randomNeuralNetworkBrain() {
+		GeneticTrainedNetwork nn = new GeneticTrainedNetwork(15);
+		for (int i = 0; i < 15; i++) {
+			Threshold f = Threshold.getRandomFunction();
+			nn.setNeuronFunction(i, f, f.getDefaultParams());
+		}
+		for (int i = 0; i < 6; i++) {
+			nn.setNeuronFunction(i, Threshold.LINEAR, Threshold.LINEAR.getDefaultParams());
+		}
+		for (int i = 0; i < 6; i++) {
+			for (int j = 6; j < 15; j++) {
+				nn.addLink(i, j, Math.random());
+			}
+		}
+		for (int i = 6; i < 15; i++) {
+			for (int j = 6; j < 15; j++) {
+				if (i < j) {
+					nn.addLink(i, j, Math.random());
+				}
+			}
+		}
+		return nn;
 	}
 	
 
