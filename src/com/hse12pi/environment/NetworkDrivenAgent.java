@@ -24,6 +24,8 @@ public class NetworkDrivenAgent extends Agent{
 
 	private static final double FOOD = 10;
 	
+	private double initialAngle = 0; 
+	
 	//neural network needed vars
 	private volatile NeuralNetwork brain;
 	
@@ -37,13 +39,24 @@ public class NetworkDrivenAgent extends Agent{
 	}
 	public synchronized void interact(AgentsEnvironment env) {
 		
-		//double deltaAngle = random.nextDouble() * 2 * Math.PI;
-		double deltaAngle = 0;
-		double deltaSpeed = random.nextDouble() * 2 * Math.PI;
+		List<Double> nnInputs = this.createNnInputs(env);
+
+		this.activateNeuralNetwork(nnInputs);
+
+		int neuronsCount = this.brain.getNeuronsCount();
+		double deltaAngle = this.brain.getAfterActivationSignal(neuronsCount - 2);
+		
+		double deltaSpeed = this.brain.getAfterActivationSignal(neuronsCount - 1);
+		
+		deltaSpeed = this.avoidNaNAndInfinity(deltaSpeed);
+		deltaAngle = this.avoidNaNAndInfinity(deltaAngle);
+
 		double newSpeed = this.normalizeSpeed(this.getSpeed() + deltaSpeed);
 		double newAngle = this.getAngle() + this.normalizeDeltaAngle(deltaAngle);
+
 		this.setAngle(newAngle);
 		this.setSpeed(newSpeed);
+
 		this.move();
 	}
 	
@@ -53,7 +66,12 @@ public class NetworkDrivenAgent extends Agent{
 		}
 		return x;
 	}
-	
+	private void activateNeuralNetwork(List<Double> nnInputs) {
+		for (int i = 0; i < nnInputs.size(); i++) {
+			this.brain.putSignalToNeuron(i, nnInputs.get(i));
+		}
+		this.brain.activate();
+	}
 	protected boolean inSight(AbstractAgent agent) {
 		double crossProduct = this.cosTeta(this.getRx(), this.getRy(), agent.getX() - this.getX(), agent.getY() - this.getY());
 		return (crossProduct > 0);
@@ -124,6 +142,85 @@ public class NetworkDrivenAgent extends Agent{
 			}
 		}
 		return nn;
+	}
+	
+	protected List<Double> createNnInputs(AgentsEnvironment environment) {
+		// Find nearest food
+		Food nearestFood = null;
+		double nearestFoodDist = Double.MAX_VALUE;
+
+		for (Food currFood : environment.filter(Food.class)) {
+			// agent can see only ahead
+			if (this.inSight(currFood)) {
+				double currFoodDist = this.distanceTo(currFood);
+				if ((nearestFood == null) || (currFoodDist <= nearestFoodDist)) {
+					nearestFood = currFood;
+					nearestFoodDist = currFoodDist;
+				}
+			}
+		}
+
+		// Find nearest agent
+		Agent nearestAgent = null;
+		double nearestAgentDist = maxAgentsDistance;
+
+		for (Agent currAgent : environment.filter(Agent.class)) {
+			// agent can see only ahead
+			if ((this != currAgent) && (this.inSight(currAgent))) {
+				double currAgentDist = this.distanceTo(currAgent);
+				if (currAgentDist <= nearestAgentDist) {
+					nearestAgent = currAgent;
+					nearestAgentDist = currAgentDist;
+				}
+			}
+		}
+
+		List<Double> nnInputs = new LinkedList<Double>();
+
+		double rx = this.getRx();
+		double ry = this.getRy();
+
+		double x = this.getX();
+		double y = this.getY();
+
+		if (nearestFood != null) {
+			double foodDirectionVectorX = nearestFood.getX() - x;
+			double foodDirectionVectorY = nearestFood.getY() - y;
+
+			// left/right cos
+			double foodDirectionCosTeta =
+					Math.signum(this.pseudoScalarProduct(rx, ry, foodDirectionVectorX, foodDirectionVectorY))
+							* this.cosTeta(rx, ry, foodDirectionVectorX, foodDirectionVectorY);
+
+			nnInputs.add(FOOD);
+			nnInputs.add(nearestFoodDist);
+			nnInputs.add(foodDirectionCosTeta);
+
+		} else {
+			nnInputs.add(EMPTY);
+			nnInputs.add(0.0);
+			nnInputs.add(0.0);
+		}
+
+		if (nearestAgent != null) {
+			double agentDirectionVectorX = nearestAgent.getX() - x;
+			double agentDirectionVectorY = nearestAgent.getY() - y;
+
+			// left/right cos
+			double agentDirectionCosTeta =
+					Math.signum(this.pseudoScalarProduct(rx, ry, agentDirectionVectorX, agentDirectionVectorY))
+							* this.cosTeta(rx, ry, agentDirectionVectorX, agentDirectionVectorY);
+
+			nnInputs.add(AGENT);
+			nnInputs.add(nearestAgentDist);
+			nnInputs.add(agentDirectionCosTeta);
+
+		} else {
+			nnInputs.add(EMPTY);
+			nnInputs.add(0.0);
+			nnInputs.add(0.0);
+		}
+		return nnInputs;
 	}
 	
 

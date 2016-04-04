@@ -16,6 +16,8 @@ import java.io.FileOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.prefs.Preferences;
 
 import javax.swing.ButtonGroup;
@@ -53,7 +55,9 @@ public class Main {
 
 	private static volatile boolean regenerateFood = true;
 	
+	private static int eatenFoodCount = 0; 
 	
+	private static int count =0 ; 
 
 	// UI
 
@@ -63,11 +67,24 @@ public class Main {
 
 	private static JPanel controlsPanel;
 
-	private static JTextField evolveTextField;
+	private static JTextField populationTextField;
+	
+	private static JTextField foodNumber; 
+	
+	private static JRadioButton staticF;
+	
+	private static JRadioButton dinamicF; 
 
-	private static JButton evolveButton;
+	private static JRadioButton geneticAlgorithm;
+	
+	private static JRadioButton beesAlgorithm; 
+	
+	private static JRadioButton decicionTree; 
+	
+	private static JTextField timer;
+	
+	private static JButton startButton;
 
-	private static JButton playPauseButton;
 
 	private static JButton resetButton;
 
@@ -137,17 +154,17 @@ public class Main {
 		appFrame.add(controlsPanel, BorderLayout.EAST);
 		controlsPanel.setLayout(new GridLayout(11, 1, 5, 5));
 
-		evolveTextField = new JTextField("10");
+/*		evolveTextField = new JTextField("10");
 		controlsPanel.add(evolveTextField);
 
 		playPauseButton = new JButton("pause");
-		controlsPanel.add(playPauseButton);
+		controlsPanel.add(playPauseButton);*/
 
 		resetButton = new JButton("reset");
 		controlsPanel.add(resetButton);
-
-		populationInfoLabel = new JLabel("Population: " + populationNumber, SwingConstants.CENTER);
+		populationInfoLabel = new JLabel("Eaten food: " + eatenFoodCount, SwingConstants.CENTER);
 		appFrame.add(populationInfoLabel, BorderLayout.NORTH);
+		
 
 	}
 	
@@ -156,6 +173,8 @@ public class Main {
 		environment.addListener(new EatenFoodObserver() {
 			protected void addRandomPieceOfFood(AgentsEnvironment env) {
 				if (regenerateFood) {
+					eatenFoodCount++; 
+					populationInfoLabel.setText(Integer.toString(eatenFoodCount));
 					Food food = createRandomFood(env.getWidth(), env.getHeight());
 					env.addAgent(food);
 				}
@@ -165,11 +184,26 @@ public class Main {
 		initializeAgents(brain, agentsCount);
 		initializeFood(foodCount);
 	}
+	
+	private static void evolvePopulation() {
+		ga.evolve();
+		NeuralNetwork newBrain = ga.getBest();
+		setAgentBrains(newBrain);
+		
+	}
 	private static void mainEnvironmentLoop() throws InterruptedException {
 		for (;;) {
 			Thread.sleep(50);
 			if (play) {
 				environment.timeStep();
+				count ++;
+				if ((eatenFoodCount == 5 )|| (count == 100)){
+					System.out.println("need to envolve");
+					evolvePopulation();
+					eatenFoodCount =0;
+					count =0; 
+					
+				}
 			}
 			Drawing.paintEnvironment(displayEnvironmentCanvas, environment);
 			SwingUtilities.invokeLater(new Runnable() {
