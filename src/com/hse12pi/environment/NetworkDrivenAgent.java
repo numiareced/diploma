@@ -4,9 +4,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.hse12pi.decisiontree.DecisionTree;
+import com.hse12pi.decisiontree.UnknownDecisionException;
 import com.hse12pi.geneticApproach.neuralnetwork.GeneticTrainedNetwork;
 import com.hse12pi.geneticApproach.neuralnetwork.NeuralNetwork;
 import com.hse12pi.geneticApproach.neuralnetwork.Threshold;
+
+
+
 
 public class NetworkDrivenAgent extends Agent{
 
@@ -59,6 +64,7 @@ public class NetworkDrivenAgent extends Agent{
 
 		this.move();
 	}
+	
 	
 	private double avoidNaNAndInfinity(double x) {
 		if ((Double.isNaN(x)) || Double.isInfinite(x)) {

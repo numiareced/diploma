@@ -84,6 +84,8 @@ public class Main {
 	private static JTextField timer;
 	
 	private static JButton startButton;
+	
+	private static boolean decisionTree = true;
 
 
 	private static JButton resetButton;
@@ -111,7 +113,9 @@ public class Main {
 		int foodCount = 10;
 		int gaPopulationSize = 5;
 		int parentalChromosomesSurviveCount = 1;
+		if (!decisionTree){
 		initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount, null);
+		}
 
 		initializeEnvironment(environmentWidth, environmentHeight, agentsCount, foodCount);
 
@@ -180,8 +184,13 @@ public class Main {
 				}
 			}
 		});
+		if (!decisionTree){
 		NeuralNetwork brain = ga.getBest();
 		initializeAgents(brain, agentsCount);
+		}
+		else {
+			initializeAgents(null, agentsCount);
+		}
 		initializeFood(foodCount);
 	}
 	
@@ -194,6 +203,7 @@ public class Main {
 	private static void mainEnvironmentLoop() throws InterruptedException {
 		for (;;) {
 			Thread.sleep(50);
+			if (!decisionTree){
 			if (play) {
 				environment.timeStep();
 				count ++;
@@ -204,6 +214,7 @@ public class Main {
 					count =0; 
 					
 				}
+			}
 			}
 			Drawing.paintEnvironment(displayEnvironmentCanvas, environment);
 			SwingUtilities.invokeLater(new Runnable() {
@@ -222,9 +233,16 @@ public class Main {
 			int x = random.nextInt(environmentWidth);
 			int y = random.nextInt(environmentHeight);
 			double direction = random.nextDouble() * 2 * Math.PI;
-			NetworkDrivenAgent agent = new NetworkDrivenAgent(x,y,direction);
+			if (brain !=null){
+		    NetworkDrivenAgent agent = new NetworkDrivenAgent(x,y,direction);
 			agent.setBrain(brain);
 			environment.addAgent(agent);
+			}
+			else {
+				TreeDrivenAgent agent = new TreeDrivenAgent(x,y,direction);
+				environment.addAgent(agent);
+			}
+			
 		}
 	}
 
