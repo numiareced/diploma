@@ -28,11 +28,13 @@ private static Random random = new Random();
 	private double rotation;
 	
 	private double initialAngle = 0; 
+	private double accSpeed = 0; 
 	private boolean needToSpeedUp = false;
+	private double angle; 
 	DecisionTree tree;
 	public TreeDrivenAgent(double x, double y, double angle) {
-		super(x, y, angle);
-		DecisionTree tree = makeFoodTree();
+ 		super(x, y, angle);
+		tree = makeFoodTree();
 		tree.compile();
 	}
 public synchronized void interact(AgentsEnvironment env) {
@@ -50,13 +52,14 @@ public synchronized void interact(AgentsEnvironment env) {
 			output = decide(env);
 			double deltaAngle = output.get("Angle");
 			double deltaSpeed = output.get("Speed");
+			//System.out.println("speed is:" + deltaSpeed);
 
 			deltaSpeed = this.avoidNaNAndInfinity(deltaSpeed);
 			deltaAngle = this.avoidNaNAndInfinity(deltaAngle);
 
 			double newSpeed = this.normalizeSpeed(this.getSpeed() + deltaSpeed);
 			double newAngle = this.getAngle() + this.normalizeDeltaAngle(deltaAngle);
-
+			System.out.println("speed is:" + newSpeed );
 			this.setAngle(newAngle);
 			this.setSpeed(newSpeed);
 
@@ -143,7 +146,6 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		}
 	}
 	if (nearestFood != null){
-		
 		for (Agent currAgent : environment.filter(Agent.class)) {
 			// agent can see only ahead
 			if ((this != currAgent) && (this.inSight(currAgent))) {
@@ -156,61 +158,60 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		}
 		if (nearestAgent !=null){
 			if (canSee(nearestAgent,nearestFood)){
-				if (nearestAgent.getSpeed() > this.getSpeed() ) {
-					if (canSpeedup((Agent)this, nearestAgent)){
-						needToSpeedUp = true; 
+					if (canReachFood(this, (TreeDrivenAgent)nearestAgent, nearestFood)){
 						inputForDecision.put("Food", "true");
 						inputForDecision.put("Agent", "true");
-						inputForDecision.put("SeeFood", "true");
-						inputForDecision.put("isFaster", "true");
-						inputForDecision.put("CanSpeedUp", "true");
+						inputForDecision.put("seeFood", "true");
+						inputForDecision.put("canReach", "true");
+						if (canSpeedUp(this, (TreeDrivenAgent)nearestAgent, nearestFood)){
+							inputForDecision.put("CanSpeedUp", "true");
+							needToSpeedUp = true; 
+							
+					    }
+						else {
+							inputForDecision.put("CanSpeedUp", "false");
+							needToSpeedUp = false; 
+						}
 					}
 					else {
-						needToSpeedUp = false; 
 						inputForDecision.put("Food", "true");
 						inputForDecision.put("Agent", "true");
-						inputForDecision.put("SeeFood", "true");
-						inputForDecision.put("isFaster", "true");
+						inputForDecision.put("seeFood", "true");
+						inputForDecision.put("canReach", "false");
 						inputForDecision.put("CanSpeedUp", "false");
 					}
-				}
-				else {
-					inputForDecision.put("Food", "true");
-					inputForDecision.put("Agent", "true");
-					inputForDecision.put("SeeFood", "true");
-					inputForDecision.put("isFaster", "false");
-					inputForDecision.put("CanSpeedUp", "false");
-				}
-				
-			}
+				}	
 			else {
 				inputForDecision.put("Food", "true");
 				inputForDecision.put("Agent", "true");
-				inputForDecision.put("SeeFood", "false");
-				inputForDecision.put("isFaster", "false");
+				inputForDecision.put("seeFood", "false");
+				inputForDecision.put("canReach", "false");
 				inputForDecision.put("CanSpeedUp", "false");
 				
 			}
 		}
 		else {
+			System.out.println("no agent");
 			inputForDecision.put("Food", "true");
 			inputForDecision.put("Agent", "false");
-			inputForDecision.put("SeeFood", "false");
-			inputForDecision.put("isFaster", "false");
+			inputForDecision.put("seeFood", "false");
+			inputForDecision.put("canReach", "false");
 			inputForDecision.put("CanSpeedUp", "false");
 		}
-		
 	}
 	else {
 		inputForDecision.put("Food", "false");
 		inputForDecision.put("Agent", "false");
-		inputForDecision.put("SeeFood", "false");
-		inputForDecision.put("isFaster", "false");
+		inputForDecision.put("seeFood", "false");
+		inputForDecision.put("canReach", "false");
 		inputForDecision.put("CanSpeedUp", "false");
+		System.out.println("no food");
 	}
+	try {
 	
 	 boolean decision = tree.apply(inputForDecision);
 	 if (decision){
+		 System.out.println("going to the food");
 			double rx = this.getRx();
 			double ry = this.getRy();
 
@@ -219,27 +220,47 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		 //eat food
 		 double foodDirectionVectorX = nearestFood.getX() - x;
 	     double foodDirectionVectorY = nearestFood.getY() - y;
-         // left/right cos
+	     calculatedSpeed = random.nextDouble()* 4;
+      // left/right cos
 			double foodDirectionCosTeta =
 					Math.signum(this.pseudoScalarProduct(rx, ry, foodDirectionVectorX, foodDirectionVectorY))
 							* this.cosTeta(rx, ry, foodDirectionVectorX, foodDirectionVectorY);
 			calculatedAngle = foodDirectionCosTeta;
 		 if (needToSpeedUp){
-			 calculatedSpeed = speedUp(this.getSpeed());
+			 calculatedSpeed = accSpeed;
 		 }
+		 
 		 output.put("Speed", calculatedSpeed);
 		 output.put("Angle", calculatedAngle);
 		 return output;
 	 }
 	 else {
+		 System.out.println("finding another");
 		 //no food, trying to find new 
 		 //calculatedSpeed = randomspeed;
 		 //calculatedAngle = randomangle; 
+		 Random rand = new Random(); 
+		 if (angle != 360){
+			 angle = angle + 10; 
+			 calculatedSpeed = 0; 
+		 }
+		 else {
+			 //already turned around but no food 
+			 //moving random direction
+			 angle = random.nextInt(360);
+			 calculatedSpeed = random.nextDouble()* 4;
+		 }
+		 
 		 output.put("Speed", calculatedSpeed);
 		 output.put("Angle", calculatedAngle);
 		 return output;
 	 }
-	 
+	}
+	catch (BadDecisionException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return output;
 }
 
 private boolean canSee(Agent agent, Food food){
@@ -247,18 +268,27 @@ private boolean canSee(Agent agent, Food food){
 	return (crossProduct > 0);
 }
 
-private boolean canSpeedup(Agent currentAgent, Agent nearestAgent){
-	//if this.speed() != maxSpeed && nearestAgent.speed() != maxSpeed;
-	// if this.speed() + acceleration > nearestAgent.speed() && <=maxSpeed
-	return true;
-	// else return false; 
+private boolean canReachFood(TreeDrivenAgent currentAgent, TreeDrivenAgent nearestAgent, Food food){
+ if ( (currentAgent.distanceTo(food)/currentAgent.getSpeed()) <= (nearestAgent.distanceTo(food)/nearestAgent.getSpeed()) ){
+	 //if your time is better, other agent cantreachfood
+	 return false; 
+ }
+ else {
+	 return true; 
+ }
 }
 
-private double speedUp(double currentSpeed){
-	int acceleration = 3; 
-	double randomValue = 0.1 ;//random 
-	double newSpeed = currentSpeed + acceleration * randomValue; 
-	return newSpeed; 
+private boolean canSpeedUp( TreeDrivenAgent currentAgent, TreeDrivenAgent nearestAgent, Food food ){
+	int acceleration = 1; 
+	Random rand = new Random(); 
+	double newSpeed = currentAgent.getSpeed() + acceleration * rand.nextDouble(); 
+	if( ( newSpeed <= 4 ) ) {
+		if (currentAgent.distanceTo(food)/newSpeed <= (nearestAgent.distanceTo(food)/nearestAgent.getSpeed())){
+			accSpeed = newSpeed; 
+			return true; 
+		}
+	}
+	return false; 
 }
 
 private Map<String,Double> calculateDirection(){
@@ -276,14 +306,16 @@ private Map<String,Double> calculateDirection(){
 	}
 	
  private  DecisionTree makeFoodTree() {
-	    try {
-	      return makeOne().setAttributes(new String[]{"Agent", "seeFood", "isFaster", "CanSpeedUp"})
-	                      .addExample(   new String[]{"True",  "True",  "False", "False", "False"}, true)
-	                      .addExample(   new String[]{"True",  "True",  "True", "True", "True" }, true)
-	                      .addExample(   new String[]{"True",  "True",  "True", "False", "False" }, true)
-	                      .addExample(   new String[]{"True",  "True",  "True", "True", "False" }, false)
-	                      .addExample(   new String[]{"True",  "False",  "False", "False", "False" }, true)
-          .addExample(   new String[]{"False",   "False"}, true);
+	 try {
+	    	return makeOne().setAttributes(new String[]{"Food", "Agent", "seeFood", "canReach", "CanSpeedUp"})
+                         .addExample(   new String[]{"true", "True",  "True",  "False", "False"}, true)
+                         
+                         .addExample(   new String[]{"true", "true",  "true",  "true", "true" }, true)
+                         .addExample(   new String[]{"true", "true",  "true",  "true", "false" }, false)
+                         .addExample(   new String[]{"true" , "true",  "true",  "true", "true"}, true)
+                         .addExample(   new String[]{"true" ,"true",  "False",  "false", "false"}, true)
+                         .addExample(   new String[]{"true", "false", "false",  "false",  "false"}, true)
+   				         .addExample(   new String[]{"false", "false","false","false","false"}, false);
 	    } catch ( UnknownDecisionException e ) {
 	    	System.out.println("unknown decision exception");
 	      return makeOne(); // this is here to shut up compiler.

@@ -216,6 +216,11 @@ public class Main {
 				}
 			}
 			}
+			else {
+				if (play) {
+					environment.timeStep();
+				}
+			}
 			Drawing.paintEnvironment(displayEnvironmentCanvas, environment);
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
