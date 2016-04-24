@@ -87,6 +87,7 @@ public class Main {
 	
 	private static boolean decisionTree = true;
 
+	private static boolean ABCalg =false;
 
 	private static JButton resetButton;
 
@@ -184,7 +185,7 @@ public class Main {
 				}
 			}
 		});
-		if (!decisionTree){
+		if ((!decisionTree) && (!ABCalg)){
 		NeuralNetwork brain = ga.getBest();
 		initializeAgents(brain, agentsCount);
 		}
@@ -203,7 +204,7 @@ public class Main {
 	private static void mainEnvironmentLoop() throws InterruptedException {
 		for (;;) {
 			Thread.sleep(50);
-			if (!decisionTree){
+			if ((!decisionTree) && (!ABCalg)){
 			if (play) {
 				environment.timeStep();
 				count ++;
@@ -234,7 +235,7 @@ public class Main {
 		int environmentWidth = environment.getWidth();
 		int environmentHeight = environment.getHeight();
 
-		for (int i = 0; i < agentsCount; i++) {
+		for (int i = 0; i < 2; i++) {
 			int x = random.nextInt(environmentWidth);
 			int y = random.nextInt(environmentHeight);
 			double direction = random.nextDouble() * 2 * Math.PI;
@@ -244,8 +245,14 @@ public class Main {
 			environment.addAgent(agent);
 			}
 			else {
+				if (decisionTree){
 				TreeDrivenAgent agent = new TreeDrivenAgent(x,y,direction);
 				environment.addAgent(agent);
+				}
+				if (ABCalg){
+					ABCDrivenAgent agent = new ABCDrivenAgent(x,y,direction);
+					environment.addAgent(agent);
+				}
 			}
 			
 		}

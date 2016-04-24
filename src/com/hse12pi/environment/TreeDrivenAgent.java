@@ -247,7 +247,7 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		 else {
 			 //already turned around but no food 
 			 //moving random direction
-			 angle = random.nextInt(360);
+			 angle =  random.nextDouble() * 2 * Math.PI;
 			 calculatedSpeed = random.nextDouble()* 4;
 		 }
 		 
