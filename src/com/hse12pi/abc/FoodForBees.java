@@ -18,40 +18,37 @@ public class FoodForBees implements Comparable<FoodForBees> {
 	// and positions of nearest enemies
 	protected static final double maxAgentsDistance = 5;
 	public int FOOD_SIZE;
-	public Map<String, Double> direction = new HashMap<String, Double>();
-	public ArrayList<Food> nectar;
-	public ArrayList<ABCDrivenAgent> enemies;
-	public ABCDrivenAgent currentAgent;
+
 	private int trials;
 	private double fitness;
 	private double selectionProbability;
 	private int conflicts; // conflicts
 	private double speed;
-	private double angle; 
 	private AgentsEnvironment environment;
-	private Food currFood; 
-	private ABCDrivenAgent nearestEnemy; 
+	public ABCDrivenAgent currentAgent;
+	private ABCDrivenAgent nearestEnemy;
+	private Food currFood;
+	private double foodCos;
 
 	public FoodForBees(int size, AgentsEnvironment e, ABCDrivenAgent currAgent) {
 		this.environment = e;
 		this.currentAgent = currAgent;
 		this.FOOD_SIZE = size;
-		this.nectar = new ArrayList<Food>();
 		this.conflicts = 0;
 		this.trials = 0;
 		this.fitness = 0.0;
 		this.selectionProbability = 0.0;
 		this.speed = 0.0;
-		this.angle = 0.0; 
-		currFood = null; 
-		nearestEnemy = null; 
+		this.foodCos = 0.0;
+		currFood = null;
+		nearestEnemy = null;
 	}
 
 	@Override
 	public int compareTo(FoodForBees o) {
 		return this.conflicts - o.getConflicts();
 	}
-	
+
 	public Food getFood() {
 		return this.currFood;
 	}
@@ -59,7 +56,7 @@ public class FoodForBees implements Comparable<FoodForBees> {
 	public void setFood(Food f) {
 		this.currFood = f;
 	}
-	
+
 	public ABCDrivenAgent getNearestEnemy() {
 		return this.nearestEnemy;
 	}
@@ -72,10 +69,14 @@ public class FoodForBees implements Comparable<FoodForBees> {
 		return this.conflicts;
 	}
 
+	public double getSpeed() {
+		return this.speed;
+	}
+
 	public void setConflicts(int t) {
 		this.conflicts = t;
 	}
-	
+
 	public ABCDrivenAgent getCurrAgent() {
 		return this.currentAgent;
 	}
@@ -83,7 +84,7 @@ public class FoodForBees implements Comparable<FoodForBees> {
 	public void setCurrAgent(ABCDrivenAgent t) {
 		this.currentAgent = t;
 	}
-	
+
 	public AgentsEnvironment getEnvironment() {
 		return this.environment;
 	}
@@ -91,58 +92,49 @@ public class FoodForBees implements Comparable<FoodForBees> {
 	public void setEnvironment(AgentsEnvironment env) {
 		this.environment = env;
 	}
-	
-	
-	
-	
-	public HashMap<String, Double> getDecision(){
-		HashMap<String, Double> output = new HashMap<String, Double>();
-		
-		speed = currentAgent.getSpeed();
-		angle = currentAgent.getAngle();
-		//System.out.println("speed & angle is : " + speed + " " +  angle);
-		output.put("Speed", speed);
-		output.put("Angle", angle);
-		return output; 
-		
+
+	public double getFoodCos() {
+		return this.foodCos;
 	}
 
-	 public void initNectar(AgentsEnvironment e) {
-	 for (Food currFood : environment.filter(Food.class)) {
-	 nectar.add(currFood);
-	 }
-	 }
-	
-	 public void initEnemies(AgentsEnvironment e) {
-	 for (ABCDrivenAgent agent : environment.filter(ABCDrivenAgent.class)) {
-	 // agent can see only ahead
-	 if (agent != currentAgent) {
-	 enemies.add(agent);
-	 }
-	 }
-	 }
+	public HashMap<String, Double> getDecision() {
+		HashMap<String, Double> output = new HashMap<String, Double>();
+		double out_speed = this.speed;
+		double out_angle = this.foodCos;
+		output.put("Speed", out_speed);
+		output.put("Angle", out_angle);
+		return output;
+
+	}
 
 	public void calculateConflicts() {
 		int currConflict = 0;
-		if (!currentAgent.inSight(currFood)){
-			currConflict+=3; 
-		}else {
-			if (nearestEnemy != null){
-			if (nearestEnemy.inSight(currFood)){
-				if (canReachFood(currentAgent, nearestEnemy, currFood)){
-					currConflict+=2; 
+		if (this.currentAgent.inSight(this.currFood)) {
+			double rx = this.currentAgent.getRx();
+			double ry = this.currentAgent.getRy();
+			double x = this.currentAgent.getX();
+			double y = this.currentAgent.getY();
+			double foodDirectionVectorX = currFood.getX() - x;
+			double foodDirectionVectorY = currFood.getY() - y;
+			double foodDirectionCosTeta = Math
+					.signum(pseudoScalarProduct(rx, ry, foodDirectionVectorX, foodDirectionVectorY))
+					* this.cosTeta(rx, ry, foodDirectionVectorX, foodDirectionVectorY);
+			this.foodCos = foodDirectionCosTeta;
+			if (this.nearestEnemy.inSight(this.currFood)) {
+				if (canReachFood(this.currentAgent, this.nearestEnemy, this.currFood)) {
+					currConflict += 1;
 				}
 			}
-			}
+		} else {
+			currConflict += 2;
+			this.foodCos = -2;
 		}
-		//System.out.println("conflict is:" + conflicts);
-		this.conflicts = currConflict; 
+		this.conflicts = currConflict;
+		this.speed = this.currentAgent.getSpeed();
 	}
 
-	private boolean canSee(Agent agent, Food food) {
-		double crossProduct = cosTeta(agent.getRx(), agent.getRy(), food.getX() - agent.getX(),
-				food.getY() - agent.getY());
-		return (crossProduct > 0);
+	protected double pseudoScalarProduct(double vx1, double vy1, double vx2, double vy2) {
+		return (vx1 * vy2) - (vy1 * vx2);
 	}
 
 	protected double cosTeta(double vx1, double vy1, double vx2, double vy2) {

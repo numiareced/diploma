@@ -17,39 +17,25 @@ public class ArtificialBeeColony {
 							 * The number of parameters of the problem to be
 							 * optimized
 							 */
-	public int NP; /*
-					 * The number of total bees/colony size. employed + onlookers
-					 */
 	public int FOOD_NUMBER; /*
 							 * The number of food sources equals the half of the
 							 * colony size
 							 */
-	public int LIMIT; /*
-						 * A food source which could not be improved through
-						 * "limit" trials is abandoned by its employed bee
-						 */
 	public int MAX_EPOCH; /*
 							 * The number of cycles for foraging {a stopping
 							 * criteria}
 							 */
-	public int MIN_SHUFFLE;
-	public int MAX_SHUFFLE;
 	HashMap<String, Double> decision;
 	public Random rand;
 	public ArrayList<FoodForBees> foodSources;
-	public ArrayList<FoodForBees> solutions;
 	public FoodForBees gBest;
 	public int epoch;
 	AgentsEnvironment environment;
 	ABCDrivenAgent currAgent;
 
 	public ArtificialBeeColony(int n) {
-		NP = n * 2; // pop size 20 to 40 or even 100
 		FOOD_NUMBER = n;
-		LIMIT = 5;
-		MAX_EPOCH = 10;
-		MIN_SHUFFLE = 8;
-		MAX_SHUFFLE = 20;
+		MAX_EPOCH = 5;
 		gBest = null;
 		epoch = 0;
 		decision = new HashMap<String, Double>();
@@ -67,7 +53,6 @@ public class ArtificialBeeColony {
 
 	public HashMap<String, Double> optimizeDirection() {
 		foodSources = new ArrayList<FoodForBees>();
-		solutions = new ArrayList<FoodForBees>();
 		HashMap<String, Double> output = new HashMap<String, Double>();
 		rand = new Random();
 		boolean done = false;
@@ -91,7 +76,7 @@ public class ArtificialBeeColony {
 				sendScoutBees();
 				epoch++;
 				// This is here simply to show the runtime status.
-				//System.out.println("Epoch: " + epoch);
+				System.out.println("Epoch: " + epoch);
 			} else {
 				done = true;
 			}
@@ -103,25 +88,21 @@ public class ArtificialBeeColony {
 			done = false;
 			noSolution = true;
 		}
-
-		//System.out.println("done.");
-		//System.out.println("Completed " + epoch + " epochs.");
 		if (noSolution) {
 			Random random = new Random();
-			double deltaAngle =  random.nextDouble() * 2 * Math.PI;
+			double deltaAngle = random.nextDouble() * 2 * Math.PI;
 			double deltaSpeed = random.nextDouble() * 4;
 			output.put("Speed", deltaSpeed);
 			output.put("Angle", deltaAngle);
 			return output;
 		} else {
 			return gBest.getDecision(); // return speed and dir
-			
 		}
 	}
 
 	public void initialize() {
 		if ((environment != null) && (currAgent != null)) {
-			ArrayList<Food> allfood = new ArrayList<Food>(); 
+			ArrayList<Food> allfood = new ArrayList<Food>();
 			for (Food currFood : environment.filter(Food.class)) {
 				allfood.add(currFood);
 			}
@@ -129,7 +110,7 @@ public class ArtificialBeeColony {
 				FoodForBees newHoney = new FoodForBees(FOOD_NUMBER, environment, currAgent);
 				foodSources.add(newHoney);
 				foodSources.get(i).setFood(allfood.get(i));
-				foodSources.get(i).setNearestEnemy(calculateNearestEnemy(environment,allfood.get(i)));
+				foodSources.get(i).setNearestEnemy(calculateNearestEnemy(environment, allfood.get(i)));
 				foodSources.get(i).calculateConflicts(); //
 			}
 		} else {
@@ -137,38 +118,33 @@ public class ArtificialBeeColony {
 		}
 	}
 
-	
-	private ABCDrivenAgent calculateNearestEnemy(AgentsEnvironment env, Food f){
+	private ABCDrivenAgent calculateNearestEnemy(AgentsEnvironment env, Food f) {
 		Agent nearestAgent = null;
 		double nearestAgentDist = Double.MAX_VALUE;
-		 for (Agent agent : environment.filter(Agent.class)) {
-			 double currEnemyDist = distanceTo(agent, f);
-			 if (currEnemyDist <= nearestAgentDist) {
-					nearestAgent = agent;
-					nearestAgentDist = currEnemyDist;
-				}
-		 }
-		return (ABCDrivenAgent)nearestAgent;
+		for (Agent agent : environment.filter(Agent.class)) {
+			double currEnemyDist = distanceTo(agent, f);
+			if (currEnemyDist <= nearestAgentDist) {
+				nearestAgent = agent;
+				nearestAgentDist = currEnemyDist;
+			}
+		}
+		return (ABCDrivenAgent) nearestAgent;
 	}
-	
-/*	protected double distanceTo(AbstractAgent food, AbstractAgent agent) {
-		return this.module(agent.getX() - food.getX(), agent.getY() - food.getY());
-	}*/
-	
+
 	protected double distanceTo(AbstractAgent food, AbstractAgent agent) {
 		return module(agent.getX() - food.getX(), agent.getY() - food.getY());
 	}
+
 	protected double module(double vx1, double vy1) {
 		return Math.sqrt((vx1 * vx1) + (vy1 * vy1));
 	}
-	
+
 	public int getRandomNumber(int low, int high) {
 		return (int) Math.round((high - low) * rand.nextDouble() + low);
 	}
 
 	public void memorizeBestFoodSource() {
 		gBest = Collections.min(foodSources);
-		//System.out.println("best is:" + gBest.getConflicts());
 	}
 
 	public void sendEmployedBees() {
@@ -178,7 +154,6 @@ public class ArtificialBeeColony {
 		for (int i = 0; i < FOOD_NUMBER; i++) {
 			// A randomly chosen solution is used in producing a mutant solution
 			// of the solution i
-			// neighborBee = getRandomNumber(0, Food_Number-1);
 			neighborBeeIndex = getExclusiveRandomNumber(FOOD_NUMBER - 1, i);
 			currentBee = foodSources.get(i);
 			neighborBee = foodSources.get(neighborBeeIndex);
@@ -201,70 +176,54 @@ public class ArtificialBeeColony {
 	}
 
 	public void sendToWork(FoodForBees currentBee, FoodForBees neighborBee) {
-		// get curr speed & dist
-		// get neightbor speed & dist
-		// generate new speed & dist
-		// set to curr agent
-		// calculate conflicts. If this is better - trials (0)
-		// else swap?? read about this
-//		int newValue = 0;
-		//int tempValue = 0;
-		double newSpeed  = 0.0; 
-		double tempSpeed = 0.0; 
-		double tempAngle = 0.0; 
-		double newAngle = 0.0; 
-	//	int tempIndex = 0;
-		int prevConflicts = 0;
-		int currConflicts = 0;
-/*		int parameterToChange = 0;
-		int randEnemy = 0; 
-		double speedToChange = 0.0; */
-		// get number of conflicts
-		prevConflicts = currentBee.getConflicts();
-		// The parameter to be changed is determined randomly
-		//parameterToChange = getRandomNumber(0, MAX_LENGTH - 1);
-		tempSpeed = currentBee.getCurrAgent().getSpeed();
-		//System.out.println("got speed" + tempSpeed);
-		tempAngle = currentBee.getCurrAgent().getAngle();
-		
-		if (neighborBee.getNearestEnemy() != null ){
-			if (tempSpeed != 0){
-			newSpeed =  (tempSpeed - neighborBee.getNearestEnemy().getSpeed()) * ( rand.nextDouble()) ;
+
+		double currConflict = currentBee.getConflicts();
+		double neightborSpeed = 0;
+		double currentSpeed = currentBee.getSpeed();
+		double newSpeed = 0;
+		if (currConflict != 2) { // we see food and have angle for it, need just
+									// to mutate speed
+			if (neighborBee.getNearestEnemy() != null) {
+				neightborSpeed = neighborBee.getNearestEnemy().getSpeed();
+				if (neightborSpeed != 0) {
+					newSpeed = currentSpeed + (0.5 * neightborSpeed * rand.nextDouble());
+				} else {
+					newSpeed = currentSpeed + (0.5 * rand.nextDouble());
+				}
+			} else {
+				System.out.println("error during..");
 			}
-			else {
-				//System.out.println("mutate speed");
-				newSpeed = rand.nextDouble() * 4 ;
-	
+			if (newSpeed > 4.0) {
+				newSpeed = 4.0;
 			}
-			//newAngle = tempAngle + (tempAngle - neighborBee.getNearestEnemy().getAngle()) * ( rand.nextDouble() - 0.5)*2;
-		}
-		else {
-			newSpeed =  rand.nextDouble() * 4 ;
-			//newAngle =  rand.nextDouble() * 2 * Math.PI; ;
-		}
-/*		if (newSpeed <= 0 ){
-			newSpeed = 0 ; 
-		}*/
-		if (newSpeed > 4.0 ){
-			newSpeed = 4.0; 
-		}
-		
-		currentBee.getCurrAgent().setSpeed(newSpeed);
-		//currentBee.getCurrAgent().setAngle(newAngle);
-		currentBee.calculateConflicts();
-		currConflicts = currentBee.getConflicts();
-		if ( prevConflicts < currConflicts){
-			currentBee.getCurrAgent().setSpeed(tempSpeed);
-			//currentBee.getCurrAgent().setAngle(tempAngle);
-			currentBee.calculateConflicts();
+			if (newSpeed < -4.0) {
+				newSpeed = -4.0;
+			}
+			if (newSpeed != 0) {
+				currentBee.getCurrAgent().setSpeed(newSpeed);
+				currentBee.calculateConflicts();
+				int newConflicts = currentBee.getConflicts();
+				if (currConflict <= newConflicts) {
+					// no improvement
+					currentBee.getCurrAgent().setSpeed(currentSpeed);
+					currentBee.calculateConflicts();
+					currentBee.setTrials(currentBee.getTrials() + 1);
+				} else {
+					currentBee.setTrials(0);
+				}
+			} else {
+				currentBee.setTrials(currentBee.getTrials() + 1);
+				// no speed
+			}
+		} else {
+			// we dont see this food, no worth trying until we change the angle
 			currentBee.setTrials(currentBee.getTrials() + 1);
-		}else {
-			currentBee.setTrials(0);
+			System.out.println("dont see food");
 		}
+
 	}
 
 	public void getFitness() {
-
 		// calculate best scores
 		// Lowest errors = 100%, Highest errors = 0%
 		FoodForBees thisFood = null;
@@ -273,14 +232,13 @@ public class ArtificialBeeColony {
 		// The worst score would be the one with the highest energy, best would
 		// be lowest.
 		worstScore = Collections.max(foodSources).getConflicts();
-
 		// Convert to a weighted percentage.
 		bestScore = worstScore - Collections.min(foodSources).getConflicts();
-
 		for (int i = 0; i < FOOD_NUMBER; i++) {
 			thisFood = foodSources.get(i);
 			thisFood.setFitness((worstScore - thisFood.getConflicts()) * 100.0 / bestScore);
 		}
+		System.out.println("getting fitness");
 	}
 
 	public void calculateProbabilities() {
@@ -298,6 +256,7 @@ public class ArtificialBeeColony {
 			thisFood = foodSources.get(j);
 			thisFood.setSelectionProbability((0.9 * (thisFood.getFitness() / maxfit)) + 0.1);
 		}
+		System.out.println("calc probs");
 	}
 
 	/*
@@ -309,22 +268,18 @@ public class ArtificialBeeColony {
 	public void sendOnlookerBees() {
 		// check solution and optimize it
 		int i = 0;
-		int t = 0;
 		int neighborBeeIndex = 0;
 		FoodForBees currentBee = null;
 		FoodForBees neighborBee = null;
-
-		while (t < FOOD_NUMBER) {
-			currentBee = foodSources.get(i);
-			if (rand.nextDouble() < currentBee.getSelectionProbability()) {
-				t++;
+		System.out.println("onlookerzz");
+		for (int j = 0; j < FOOD_NUMBER; j++) {
+			currentBee = foodSources.get(j);
+			if (currentBee.getSelectionProbability() < 0.7) {
 				neighborBeeIndex = getExclusiveRandomNumber(FOOD_NUMBER - 1, i);
 				neighborBee = foodSources.get(neighborBeeIndex);
+				System.out.println("onlooker");
 				sendToWork(currentBee, neighborBee);
-			}
-			i++;
-			if (i == FOOD_NUMBER) {
-				i = 0;
+				i++;
 			}
 		}
 	}
@@ -337,19 +292,15 @@ public class ArtificialBeeColony {
 	 */
 	public void sendScoutBees() {
 		FoodForBees currentBee = null;
-		int shuffles = 0;
-
 		for (int i = 0; i < FOOD_NUMBER; i++) {
 			currentBee = foodSources.get(i);
-			if (currentBee.getTrials() >= LIMIT) {
-				shuffles = getRandomNumber(MIN_SHUFFLE, MAX_SHUFFLE);
-				for (int j = 0; j < shuffles; j++) {
-					Random random = new Random();
-					double deltaAngle = random.nextDouble() * 360;
-					double deltaSpeed = random.nextDouble() * 4;
-					currentBee.getCurrAgent().setAngle(deltaAngle);
-					currentBee.getCurrAgent().setSpeed(deltaSpeed);
-				}
+			if (currentBee.getTrials() > 0) {
+				System.out.println("sending scout");
+				Random random = new Random();
+				double deltaAngle = random.nextDouble() * 2 * Math.PI;
+				double deltaSpeed = random.nextDouble() * 4;
+				currentBee.getCurrAgent().setAngle(deltaAngle);
+				currentBee.getCurrAgent().setSpeed(deltaSpeed);
 				currentBee.calculateConflicts();
 				currentBee.setTrials(0);
 			}

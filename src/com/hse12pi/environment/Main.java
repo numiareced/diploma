@@ -1,4 +1,5 @@
 package com.hse12pi.environment;
+
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -41,10 +42,10 @@ import com.hse12pi.geneticApproach.neuralnetwork.GeneticTrainedNetwork;
 import com.hse12pi.geneticApproach.neuralnetwork.NeuralNetwork;
 
 public class Main {
-	
+
 	private static AgentsEnvironment environment;
 	private static GeneticAlgorithm<GeneticTrainedNetwork, Double> ga;
-	
+
 	private static Random random = new Random();
 
 	private static int populationNumber = 0;
@@ -54,10 +55,10 @@ public class Main {
 	private static volatile boolean staticFood = true;
 
 	private static volatile boolean regenerateFood = true;
-	
-	private static int eatenFoodCount = 0; 
-	
-	private static int count =0 ; 
+
+	private static int eatenFoodCount = 0;
+
+	private static int count = 0;
 
 	// UI
 
@@ -68,36 +69,36 @@ public class Main {
 	private static JPanel controlsPanel;
 
 	private static JTextField populationTextField;
-	
-	private static JTextField foodNumber; 
-	
+
+	private static JTextField foodNumber;
+
 	private static JRadioButton staticF;
-	
-	private static JRadioButton dinamicF; 
+
+	private static JRadioButton dinamicF;
 
 	private static JRadioButton geneticAlgorithm;
-	
-	private static JRadioButton beesAlgorithm; 
-	
-	private static JRadioButton decicionTree; 
-	
-	private static JTextField timer;
-	
-	private static JButton startButton;
-	
-	private static boolean decisionTree = true;
 
-	private static boolean ABCalg =false;
+	private static JRadioButton beesAlgorithm;
+
+	private static JRadioButton decicionTree;
+
+	private static JTextField timer;
+
+	private static JButton startButton;
+
+	private static boolean decisionTree = false;
+
+	private static boolean ABCalg = true;
 
 	private static JButton resetButton;
 
-	//private static JRadioButton staticFoodRadioButton;
+	// private static JRadioButton staticFoodRadioButton;
 
-//	private static JRadioButton dynamicFoodRadioButton;
+	// private static JRadioButton dynamicFoodRadioButton;
 
-	//private static ButtonGroup foodTypeButtonGroup;
+	// private static ButtonGroup foodTypeButtonGroup;
 
-	//private static JCheckBox regenerateFoodCheckbox;
+	// private static JCheckBox regenerateFoodCheckbox;
 
 	private static JLabel populationInfoLabel;
 
@@ -114,8 +115,8 @@ public class Main {
 		int foodCount = 10;
 		int gaPopulationSize = 5;
 		int parentalChromosomesSurviveCount = 1;
-		if (!decisionTree){
-		initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount, null);
+		if (!decisionTree) {
+			initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount, null);
 		}
 
 		initializeEnvironment(environmentWidth, environmentHeight, agentsCount, foodCount);
@@ -124,20 +125,22 @@ public class Main {
 
 		initializeUI(environmentWidth, environmentHeight);
 
-		//initializeAddingFoodFunctionality();
+		// initializeAddingFoodFunctionality();
 
-		//initializeResetButtonFunctionality();
+		// initializeResetButtonFunctionality();
 
 		displayUI();
 
 		mainEnvironmentLoop();
 	}
-	
+
 	private static void initializeCanvas(int environmentWidth, int environmentHeight) {
-		displayEnvironmentBufferedImage = new BufferedImage(environmentWidth, environmentHeight, BufferedImage.TYPE_INT_RGB);
+		displayEnvironmentBufferedImage = new BufferedImage(environmentWidth, environmentHeight,
+				BufferedImage.TYPE_INT_RGB);
 		displayEnvironmentCanvas = (Graphics2D) displayEnvironmentBufferedImage.getGraphics();
 		displayEnvironmentCanvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	}
+
 	private static void displayUI() {
 		// put application frame to the center of screen
 		appFrame.setLocationRelativeTo(null);
@@ -159,65 +162,66 @@ public class Main {
 		appFrame.add(controlsPanel, BorderLayout.EAST);
 		controlsPanel.setLayout(new GridLayout(11, 1, 5, 5));
 
-/*		evolveTextField = new JTextField("10");
-		controlsPanel.add(evolveTextField);
-
-		playPauseButton = new JButton("pause");
-		controlsPanel.add(playPauseButton);*/
+		/*
+		 * evolveTextField = new JTextField("10");
+		 * controlsPanel.add(evolveTextField);
+		 * 
+		 * playPauseButton = new JButton("pause");
+		 * controlsPanel.add(playPauseButton);
+		 */
 
 		resetButton = new JButton("reset");
 		controlsPanel.add(resetButton);
 		populationInfoLabel = new JLabel("Eaten food: " + eatenFoodCount, SwingConstants.CENTER);
 		appFrame.add(populationInfoLabel, BorderLayout.NORTH);
-		
 
 	}
-	
-	private static void initializeEnvironment(int environmentWidth, int environmentHeight, int agentsCount, int foodCount) {
+
+	private static void initializeEnvironment(int environmentWidth, int environmentHeight, int agentsCount,
+			int foodCount) {
 		environment = new AgentsEnvironment(environmentWidth, environmentHeight);
 		environment.addListener(new EatenFoodObserver() {
 			protected void addRandomPieceOfFood(AgentsEnvironment env) {
 				if (regenerateFood) {
-					eatenFoodCount++; 
+					eatenFoodCount++;
 					populationInfoLabel.setText(Integer.toString(eatenFoodCount));
 					Food food = createRandomFood(env.getWidth(), env.getHeight());
 					env.addAgent(food);
 				}
 			}
 		});
-		if ((!decisionTree) && (!ABCalg)){
-		NeuralNetwork brain = ga.getBest();
-		initializeAgents(brain, agentsCount);
-		}
-		else {
+		if ((!decisionTree) && (!ABCalg)) {
+			NeuralNetwork brain = ga.getBest();
+			initializeAgents(brain, agentsCount);
+		} else {
 			initializeAgents(null, agentsCount);
 		}
 		initializeFood(foodCount);
 	}
-	
+
 	private static void evolvePopulation() {
 		ga.evolve();
 		NeuralNetwork newBrain = ga.getBest();
 		setAgentBrains(newBrain);
-		
+
 	}
+
 	private static void mainEnvironmentLoop() throws InterruptedException {
 		for (;;) {
 			Thread.sleep(50);
-			if ((!decisionTree) && (!ABCalg)){
-			if (play) {
-				environment.timeStep();
-				count ++;
-				if ((eatenFoodCount == 5 )|| (count == 100)){
-					System.out.println("need to envolve");
-					evolvePopulation();
-					eatenFoodCount =0;
-					count =0; 
-					
+			if ((!decisionTree) && (!ABCalg)) {
+				if (play) {
+					environment.timeStep();
+					count++;
+					if ((eatenFoodCount == 5) || (count == 100)) {
+						System.out.println("need to envolve");
+						evolvePopulation();
+						eatenFoodCount = 0;
+						count = 0;
+
+					}
 				}
-			}
-			}
-			else {
+			} else {
 				if (play) {
 					environment.timeStep();
 				}
@@ -230,31 +234,30 @@ public class Main {
 			});
 		}
 	}
-	
-	private static void initializeAgents( NeuralNetwork brain, int agentsCount) {
+
+	private static void initializeAgents(NeuralNetwork brain, int agentsCount) {
 		int environmentWidth = environment.getWidth();
 		int environmentHeight = environment.getHeight();
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < agentsCount; i++) {
 			int x = random.nextInt(environmentWidth);
 			int y = random.nextInt(environmentHeight);
 			double direction = random.nextDouble() * 2 * Math.PI;
-			if (brain !=null){
-		    NetworkDrivenAgent agent = new NetworkDrivenAgent(x,y,direction);
-			agent.setBrain(brain);
-			environment.addAgent(agent);
-			}
-			else {
-				if (decisionTree){
-				TreeDrivenAgent agent = new TreeDrivenAgent(x,y,direction);
+			if (brain != null) {
+				NetworkDrivenAgent agent = new NetworkDrivenAgent(x, y, direction);
+				agent.setBrain(brain);
 				environment.addAgent(agent);
+			} else {
+				if (decisionTree) {
+					TreeDrivenAgent agent = new TreeDrivenAgent(x, y, direction);
+					environment.addAgent(agent);
 				}
-				if (ABCalg){
-					ABCDrivenAgent agent = new ABCDrivenAgent(x,y,direction);
+				if (ABCalg) {
+					ABCDrivenAgent agent = new ABCDrivenAgent(x, y, direction);
 					environment.addAgent(agent);
 				}
 			}
-			
+
 		}
 	}
 
@@ -267,17 +270,15 @@ public class Main {
 			environment.addAgent(food);
 		}
 	}
-	
+
 	private static Food createRandomFood(int width, int height) {
 		int x = random.nextInt(width);
 		int y = random.nextInt(height);
 		Food food = new Food(x, y);
 		return food;
 	}
-	
-	private static void initializeGeneticAlgorithm(
-			int populationSize,
-			int parentalChromosomesSurviveCount,
+
+	private static void initializeGeneticAlgorithm(int populationSize, int parentalChromosomesSurviveCount,
 			GeneticTrainedNetwork baseNeuralNetwork) {
 		Population<GeneticTrainedNetwork> brains = new Population<GeneticTrainedNetwork>();
 
@@ -321,9 +322,7 @@ public class Main {
 			agent.setBrain(newBrain.clone());
 		}
 	}
-	
-	
-	//TODO: evolve ! 
-	
+
+	// TODO: evolve !
 
 }
