@@ -10,7 +10,7 @@ public class Drawing {
 
 	public static void paintEnvironment(Graphics2D canvas, AgentsEnvironment environment) {
 		canvas.clearRect(0, 0, environment.getWidth(), environment.getHeight());
-		canvas.setBackground(new Color(6,15,97));
+		canvas.setBackground(new Color(0, 102, 102));
 
 		canvas.setColor(new Color(200, 30, 70));
 		for (Food food : environment.filter(Food.class)) {
