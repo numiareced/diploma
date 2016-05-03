@@ -26,7 +26,6 @@ private static Random random = new Random();
 
 	private static final double FOOD = 10;
 	private double rotation;
-	
 	private double initialAngle = 0; 
 	private double accSpeed = 0; 
 	private boolean needToSpeedUp = false;
@@ -38,15 +37,6 @@ private static Random random = new Random();
 		tree.compile();
 	}
 public synchronized void interact(AgentsEnvironment env) {
-		
-		/*List<Double> nnInputs = this.createNnInputs(env);
-
-		this.activateNeuralNetwork(nnInputs);
-
-		int neuronsCount = this.brain.getNeuronsCount();
-		double deltaAngle = this.brain.getAfterActivationSignal(neuronsCount - 2);
-		
-		double deltaSpeed = this.brain.getAfterActivationSignal(neuronsCount - 1);*/
 		Map<String, Double> output = new HashMap<String, Double>();
 		try {
 			output = decide(env);
@@ -69,60 +59,6 @@ public synchronized void interact(AgentsEnvironment env) {
 			e.printStackTrace();
 		}
 	}
-
-private double avoidNaNAndInfinity(double x) {
-	if ((Double.isNaN(x)) || Double.isInfinite(x)) {
-		x = 0;
-	}
-	return x;
-}
-protected boolean inSight(AbstractAgent agent) {
-	double crossProduct = this.cosTeta(this.getRx(), this.getRy(), agent.getX() - this.getX(), agent.getY() - this.getY());
-	return (crossProduct > 0);
-}
-
-protected double distanceTo(AbstractAgent agent) {
-	return this.module(agent.getX() - this.getX(), agent.getY() - this.getY());
-}
-
-protected double cosTeta(double vx1, double vy1, double vx2, double vy2) {
-	double v1 = this.module(vx1, vy1);
-	double v2 = this.module(vx2, vy2);
-	if (v1 == 0) {
-		v1 = 1E-5;
-	}
-	if (v2 == 0) {
-		v2 = 1E-5;
-	}
-	double ret = ((vx1 * vx2) + (vy1 * vy2)) / (v1 * v2);
-	return ret;
-}
-
-protected double module(double vx1, double vy1) {
-	return Math.sqrt((vx1 * vx1) + (vy1 * vy1));
-}
-
-protected double pseudoScalarProduct(double vx1, double vy1, double vx2, double vy2) {
-	return (vx1 * vy2) - (vy1 * vx2);
-}
-
-private double normalizeSpeed(double speed) {
-	double abs = Math.abs(speed);
-	if (abs > maxSpeed) {
-		double sign = Math.signum(speed);
-		speed = sign * (abs - (Math.floor(abs / maxSpeed) * maxSpeed));
-	}
-	return speed;
-}
-
-private double normalizeDeltaAngle(double angle) {
-	double abs = Math.abs(angle);
-	if (abs > maxDeltaAngle) {
-		double sign = Math.signum(angle);
-		angle = sign * (abs - (Math.floor(abs / maxDeltaAngle) * maxDeltaAngle));
-	}
-	return angle;
-}
 
 public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisionException {
 	
@@ -158,12 +94,12 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		}
 		if (nearestAgent !=null){
 			if (canSee(nearestAgent,nearestFood)){
-					if (canReachFood(this, (TreeDrivenAgent)nearestAgent, nearestFood)){
+					if (canReachFood(this, nearestAgent, nearestFood)){
 						inputForDecision.put("Food", "true");
 						inputForDecision.put("Agent", "true");
 						inputForDecision.put("seeFood", "true");
 						inputForDecision.put("canReach", "true");
-						if (canSpeedUp(this, (TreeDrivenAgent)nearestAgent, nearestFood)){
+						if (canSpeedUp(this, nearestAgent, nearestFood)){
 							inputForDecision.put("CanSpeedUp", "true");
 							needToSpeedUp = true; 
 							
@@ -268,9 +204,9 @@ private boolean canSee(Agent agent, Food food){
 	return (crossProduct > 0);
 }
 
-private boolean canReachFood(TreeDrivenAgent currentAgent, TreeDrivenAgent nearestAgent, Food food){
+private boolean canReachFood(TreeDrivenAgent currentAgent, Agent nearestAgent, Food food){
  if ( (currentAgent.distanceTo(food)/currentAgent.getSpeed()) <= (nearestAgent.distanceTo(food)/nearestAgent.getSpeed()) ){
-	 //if your time is better, other agent cantreachfood
+	 //if your time is better, other agent cant reach food
 	 return false; 
  }
  else {
@@ -278,7 +214,7 @@ private boolean canReachFood(TreeDrivenAgent currentAgent, TreeDrivenAgent neare
  }
 }
 
-private boolean canSpeedUp( TreeDrivenAgent currentAgent, TreeDrivenAgent nearestAgent, Food food ){
+private boolean canSpeedUp( TreeDrivenAgent currentAgent, Agent nearestAgent, Food food ){
 	int acceleration = 1; 
 	Random rand = new Random(); 
 	double newSpeed = currentAgent.getSpeed() + acceleration * rand.nextDouble(); 
@@ -291,12 +227,7 @@ private boolean canSpeedUp( TreeDrivenAgent currentAgent, TreeDrivenAgent neares
 	return false; 
 }
 
-private Map<String,Double> calculateDirection(){
-	
-	return null;
-	
-}
-	
+
 	private DecisionTree makeOne() {
 	    return new DecisionTree();
 	  }
@@ -309,7 +240,6 @@ private Map<String,Double> calculateDirection(){
 	 try {
 	    	return makeOne().setAttributes(new String[]{"Food", "Agent", "seeFood", "canReach", "CanSpeedUp"})
                          .addExample(   new String[]{"true", "True",  "True",  "False", "False"}, true)
-                         
                          .addExample(   new String[]{"true", "true",  "true",  "true", "true" }, true)
                          .addExample(   new String[]{"true", "true",  "true",  "true", "false" }, false)
                          .addExample(   new String[]{"true" , "true",  "true",  "true", "true"}, true)

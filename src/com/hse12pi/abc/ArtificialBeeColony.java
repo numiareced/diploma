@@ -118,7 +118,7 @@ public class ArtificialBeeColony {
 		}
 	}
 
-	private ABCDrivenAgent calculateNearestEnemy(AgentsEnvironment env, Food f) {
+	private Agent calculateNearestEnemy(AgentsEnvironment env, Food f) {
 		Agent nearestAgent = null;
 		double nearestAgentDist = Double.MAX_VALUE;
 		for (Agent agent : environment.filter(Agent.class)) {
@@ -128,7 +128,7 @@ public class ArtificialBeeColony {
 				nearestAgentDist = currEnemyDist;
 			}
 		}
-		return (ABCDrivenAgent) nearestAgent;
+		return  nearestAgent;
 	}
 
 	protected double distanceTo(AbstractAgent food, AbstractAgent agent) {

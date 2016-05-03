@@ -19,26 +19,46 @@ public class Drawing {
 
 			canvas.fillOval(x - foodRadius, y - foodRadius, foodRadius * 2, foodRadius * 2);
 		}
-
+//drawing each of the agents with it's own color 
+		//nn agent
 		canvas.setColor(Color.GREEN);
-		for (Agent agent : environment.filter(Agent.class)) {
+		for (NetworkDrivenAgent agent : environment.filter(NetworkDrivenAgent.class)) {
 			int x = (int) agent.getX();
 			int y = (int) agent.getY();
-
+			int rx = (int) ((agent.getRx() * (agentRadius + 4)) + x);
+			int ry = (int) ((agent.getRy() * (agentRadius + 4)) + y);
+			canvas.drawOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
+			canvas.drawLine(x, y, rx, ry);
 			canvas.fillOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
 		}
 
-		//canvas.setColor(Color.WHITE);
-		for (Agent agent : environment.filter(Agent.class)) {
+		
+		//dt agent
+		canvas.setColor(Color.YELLOW);
+		for (TreeDrivenAgent agent : environment.filter(TreeDrivenAgent.class)) {
 			int x = (int) agent.getX();
 			int y = (int) agent.getY();
-
 			int rx = (int) ((agent.getRx() * (agentRadius + 4)) + x);
 			int ry = (int) ((agent.getRy() * (agentRadius + 4)) + y);
-
 			canvas.drawOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
 			canvas.drawLine(x, y, rx, ry);
+			canvas.fillOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
 		}
+		//abc alg
+		
+		canvas.setColor(Color.MAGENTA);
+		for (ABCDrivenAgent agent : environment.filter(ABCDrivenAgent.class)) {
+			int x = (int) agent.getX();
+			int y = (int) agent.getY();
+			int rx = (int) ((agent.getRx() * (agentRadius + 4)) + x);
+			int ry = (int) ((agent.getRy() * (agentRadius + 4)) + y);
+			canvas.drawOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
+			canvas.drawLine(x, y, rx, ry);
+			canvas.fillOval(x - agentRadius, y - agentRadius, agentRadius * 2, agentRadius * 2);
+		}
+		
+
+	
 	}
 
 }

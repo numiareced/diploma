@@ -9,6 +9,12 @@ public class Agent implements AbstractAgent{
 	private double angle;
 
 	private double speed;
+	
+	private static final double maxSpeed = 4;
+
+	private static final double maxDeltaAngle = 1;
+
+	protected static final double maxAgentsDistance = 5;
 
 	public Agent(double x, double y, double angle) {
 		this.x = x;
@@ -74,5 +80,62 @@ public class Agent implements AbstractAgent{
 	public void interact(AgentsEnvironment env) {
 		// Stub
 	}
+	
+	public double distanceTo(AbstractAgent agent) {
+		return this.module(agent.getX() - this.getX(), agent.getY() - this.getY());
+	}
+
+	public double module(double vx1, double vy1) {
+		return Math.sqrt((vx1 * vx1) + (vy1 * vy1));
+	}
+	
+	public double pseudoScalarProduct(double vx1, double vy1, double vx2, double vy2) {
+		return (vx1 * vy2) - (vy1 * vx2);
+	}
+
+	public boolean inSight(AbstractAgent agent) {
+		double crossProduct = this.cosTeta(this.getRx(), this.getRy(), agent.getX() - this.getX(), agent.getY() - this.getY());
+		return (crossProduct > 0);
+	}
+	
+	public double cosTeta(double vx1, double vy1, double vx2, double vy2) {
+		double v1 = this.module(vx1, vy1);
+		double v2 = this.module(vx2, vy2);
+		if (v1 == 0) {
+			v1 = 1E-5;
+		}
+		if (v2 == 0) {
+			v2 = 1E-5;
+		}
+		double ret = ((vx1 * vx2) + (vy1 * vy2)) / (v1 * v2);
+		return ret;
+	}
+
+	protected double avoidNaNAndInfinity(double x) {
+		if ((Double.isNaN(x)) || Double.isInfinite(x)) {
+			x = 0;
+		}
+		return x;
+	}
+	
+	protected double normalizeSpeed(double speed) {
+		double abs = Math.abs(speed);
+		if (abs > maxSpeed) {
+			double sign = Math.signum(speed);
+			speed = sign * (abs - (Math.floor(abs / maxSpeed) * maxSpeed));
+		}
+		return speed;
+	}
+
+	protected double normalizeDeltaAngle(double angle) {
+		double abs = Math.abs(angle);
+		if (abs > maxDeltaAngle) {
+			double sign = Math.signum(angle);
+			angle = sign * (abs - (Math.floor(abs / maxDeltaAngle) * maxDeltaAngle));
+		}
+		return angle;
+	}
+	
+	
 
 }

@@ -12,6 +12,8 @@ public interface AbstractAgent {
 	void setX(double x);
 
 	void setY(double y);
+	
+	
 
 	
 }

@@ -26,7 +26,7 @@ public class FoodForBees implements Comparable<FoodForBees> {
 	private double speed;
 	private AgentsEnvironment environment;
 	public ABCDrivenAgent currentAgent;
-	private ABCDrivenAgent nearestEnemy;
+	private Agent nearestEnemy;
 	private Food currFood;
 	private double foodCos;
 
@@ -57,11 +57,11 @@ public class FoodForBees implements Comparable<FoodForBees> {
 		this.currFood = f;
 	}
 
-	public ABCDrivenAgent getNearestEnemy() {
+	public Agent getNearestEnemy() {
 		return this.nearestEnemy;
 	}
 
-	public void setNearestEnemy(ABCDrivenAgent en) {
+	public void setNearestEnemy(Agent en) {
 		this.nearestEnemy = en;
 	}
 
@@ -154,7 +154,7 @@ public class FoodForBees implements Comparable<FoodForBees> {
 		return Math.sqrt((vx1 * vx1) + (vy1 * vy1));
 	}
 
-	private boolean canReachFood(ABCDrivenAgent currentAgent, ABCDrivenAgent nearestAgent, Food food) {
+	private boolean canReachFood(ABCDrivenAgent currentAgent, Agent nearestAgent, Food food) {
 		if ((currentAgent.distanceTo(food) / currentAgent.getSpeed()) <= (nearestAgent.distanceTo(food)
 				/ nearestAgent.getSpeed())) {
 			// if your time is better, other agent cant reach food

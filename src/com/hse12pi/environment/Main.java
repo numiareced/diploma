@@ -115,29 +115,13 @@ public class Main {
 
 	private static Graphics2D displayEnvironmentCanvas;
 
-	private static boolean decisionTree = false;
-
-	private static boolean ABCalg = true;
+	private static boolean evolving = false; 
 
 	public static void main(String[] args) throws Exception {
 		int environmentWidth = 600;
 		int environmentHeight = 400;
-		
-		  int agentsCount = 15; int foodCount = 10;
-		/*  int gaPopulationSize = 5;
-		  int parentalChromosomesSurviveCount = 1; 
-		  if (!decisionTree) {
-		  initializeGeneticAlgorithm(gaPopulationSize,
-		  parentalChromosomesSurviveCount, null);
-		  }*/
-		  
-	//	  initializeEnvironment(environmentWidth, environmentHeight,
-		//  agentsCount, foodCount, true, false, false);
-		//  initializeCanvas(environmentWidth, environmentHeight);
 		initializeUI(environmentWidth, environmentHeight);
 		displayUI();
-
-     	//mainEnvironmentLoop();
 	}
 
 	private static void initializeCanvas(int environmentWidth, int environmentHeight) {
@@ -249,6 +233,7 @@ public class Main {
 		 * //agentNum_fieldActionPerformed(evt); } });
 		 */
 
+		abcAgents_check.setBackground(new java.awt.Color(255, 0, 255));
 		abcAgents_check.setText("ABC Driven Agents");
 		abcAgents_check.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -256,6 +241,7 @@ public class Main {
 			}
 		});
 
+		genAgents_check.setBackground(new java.awt.Color(102, 255, 0));
 		genAgents_check.setText("NN + Genetic Driven Agents");
 		genAgents_check.setActionCommand("");
 		genAgents_check.addActionListener(new java.awt.event.ActionListener() {
@@ -264,6 +250,7 @@ public class Main {
 			}
 		});
 
+		dtAgents_check.setBackground(new java.awt.Color(255, 255, 0));
 		dtAgents_check.setText("Decision Tree Driven Agents");
 		dtAgents_check.setActionCommand("");
 		dtAgents_check.addActionListener(new java.awt.event.ActionListener() {
@@ -279,7 +266,7 @@ public class Main {
 		          @Override
 		          public void run(){
 		            try {
-		              Thread.sleep(2000);
+		              Thread.sleep(100);
 		              startEnv_butActionPerformed(e);
 		              System.out.println("Done");
 		            } catch (Exception e) {
@@ -300,7 +287,7 @@ public class Main {
 			          @Override
 			          public void run(){
 			            try {
-			              Thread.sleep(2000);
+			              Thread.sleep(100);
 			              resetEnv_butActionPerformed(evt);
 			              System.out.println("Done");
 			            } catch (Exception e) {
@@ -333,6 +320,25 @@ public class Main {
 		percent_check.setText("% of food ");
 
 		runTest_but.setText("Run Test");
+		 runTest_but.addActionListener(new java.awt.event.ActionListener() {
+	            public void actionPerformed(java.awt.event.ActionEvent evt) {
+	            	Thread thr = new Thread(){
+				          @Override
+				          public void run(){
+				            try {
+				              Thread.sleep(100);
+				              runTest_butActionPerformed(evt);
+				              System.out.println("Done");
+				            } catch (Exception e) {
+				              e.printStackTrace();
+				            }
+				            
+				          }
+				        };
+				        thr.start();
+	                
+	            }
+	     });
 
 		stopTest_but.setText("Stop Test");
 
@@ -464,10 +470,15 @@ public class Main {
 		boolean abcInit = abcAgents_check.isSelected();
 		boolean nnInit = genAgents_check.isSelected();
 		boolean dtInit = dtAgents_check.isSelected();
+		if (!abcInit && !nnInit && !dtInit){
+			System.out.println("please select brain!");
+			// TODO: alert window on this one
+		}else {
 		initializeEnvironment(environmentWidth, environmentHeight, agentsCount, foodCount, abcInit, nnInit, dtInit);
 		initializeCanvas(environmentWidth, environmentHeight);
 		play = true; 
 		mainEnvironmentLoop();
+		}
 		}
 		}
 		else {
@@ -480,6 +491,7 @@ public class Main {
 	private static void resetEnv_butActionPerformed(ActionEvent evt){
 		play = false;
 		resume = true; 
+		evolving = false;
 		int environmentWidth = 600;
 		int environmentHeight = 400;
 		for (Agent agents : environment.filter(Agent.class)) {
@@ -505,6 +517,19 @@ public class Main {
 		}
 		
 	}
+	
+	 private static void runTest_butActionPerformed(java.awt.event.ActionEvent evt) {                                            
+	        // TODO add your handling code here:
+		    String timeField = timerValue_field.getText();
+		    if (timeField.isEmpty()){
+		    	System.out.println("please enter time value in minutes");
+		    	//TODO alert message
+		    }
+		    int timeValue = Integer.parseInt(timeField);
+		    if (timeValue !=0) {
+		    	//start timer here
+		    }
+	    }   
 
 	private static int stringToInt(String text) {
 		// TODO Auto-generated method stub
@@ -531,6 +556,7 @@ public class Main {
 		if (nnInit) {
 			int gaPopulationSize = 5;
 			int parentalChromosomesSurviveCount = 1;
+			evolving = true; 
 			initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount, null);
 			NeuralNetwork brain = ga.getBest();
 			initializeAgents(brain, agentsCount, 2);
@@ -552,7 +578,7 @@ public class Main {
 	private static  void mainEnvironmentLoop() throws InterruptedException {
 		for (;;) {
 			Thread.sleep(50);
-			if ((!decisionTree) && (!ABCalg)) {
+			if (evolving) {
 				if (play) {
 					environment.timeStep();
 					count++;
