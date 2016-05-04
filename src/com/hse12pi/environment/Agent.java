@@ -136,6 +136,13 @@ public class Agent implements AbstractAgent{
 		return angle;
 	}
 	
+	public void setEatenFoodCount(int count){
+	}
+	
+	public int getEatenFoodCount(){
+		return 0;
+	}
+	
 	
 
 }

@@ -76,7 +76,7 @@ public class ArtificialBeeColony {
 				sendScoutBees();
 				epoch++;
 				// This is here simply to show the runtime status.
-				System.out.println("Epoch: " + epoch);
+				//System.out.println("Epoch: " + epoch);
 			} else {
 				done = true;
 			}
@@ -84,7 +84,7 @@ public class ArtificialBeeColony {
 		}
 
 		if (epoch == MAX_EPOCH) {
-			System.out.println("No Solution found");
+			//System.out.println("No Solution found");
 			done = false;
 			noSolution = true;
 		}
@@ -218,7 +218,7 @@ public class ArtificialBeeColony {
 		} else {
 			// we dont see this food, no worth trying until we change the angle
 			currentBee.setTrials(currentBee.getTrials() + 1);
-			System.out.println("dont see food");
+			//System.out.println("dont see food");
 		}
 
 	}
@@ -238,7 +238,7 @@ public class ArtificialBeeColony {
 			thisFood = foodSources.get(i);
 			thisFood.setFitness((worstScore - thisFood.getConflicts()) * 100.0 / bestScore);
 		}
-		System.out.println("getting fitness");
+		//System.out.println("getting fitness");
 	}
 
 	public void calculateProbabilities() {
@@ -256,7 +256,7 @@ public class ArtificialBeeColony {
 			thisFood = foodSources.get(j);
 			thisFood.setSelectionProbability((0.9 * (thisFood.getFitness() / maxfit)) + 0.1);
 		}
-		System.out.println("calc probs");
+		//System.out.println("calc probs");
 	}
 
 	/*
@@ -271,13 +271,13 @@ public class ArtificialBeeColony {
 		int neighborBeeIndex = 0;
 		FoodForBees currentBee = null;
 		FoodForBees neighborBee = null;
-		System.out.println("onlookerzz");
+		//System.out.println("onlookerzz");
 		for (int j = 0; j < FOOD_NUMBER; j++) {
 			currentBee = foodSources.get(j);
 			if (currentBee.getSelectionProbability() < 0.7) {
 				neighborBeeIndex = getExclusiveRandomNumber(FOOD_NUMBER - 1, i);
 				neighborBee = foodSources.get(neighborBeeIndex);
-				System.out.println("onlooker");
+				//System.out.println("onlooker");
 				sendToWork(currentBee, neighborBee);
 				i++;
 			}
@@ -295,7 +295,7 @@ public class ArtificialBeeColony {
 		for (int i = 0; i < FOOD_NUMBER; i++) {
 			currentBee = foodSources.get(i);
 			if (currentBee.getTrials() > 0) {
-				System.out.println("sending scout");
+				//System.out.println("sending scout");
 				Random random = new Random();
 				double deltaAngle = random.nextDouble() * 2 * Math.PI;
 				double deltaSpeed = random.nextDouble() * 4;

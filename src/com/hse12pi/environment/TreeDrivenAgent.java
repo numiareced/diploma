@@ -13,18 +13,8 @@ import com.hse12pi.decisiontree.UnknownDecisionException;
 public class TreeDrivenAgent extends Agent {
 	
 private static Random random = new Random();
-	
-	private static final double maxSpeed = 4;
-
-	private static final double maxDeltaAngle = 1;
 
 	protected static final double maxAgentsDistance = 5;
-
-	private static final double AGENT = -10;
-
-	private static final double EMPTY = 0;
-
-	private static final double FOOD = 10;
 	private double rotation;
 	private double initialAngle = 0; 
 	private double accSpeed = 0; 

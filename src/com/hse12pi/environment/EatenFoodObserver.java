@@ -14,6 +14,13 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 	private Random random = new Random();
 
 	private double score = 0;
+	
+	private static int abcFoodcount = 0; 
+	
+	public static boolean runTest = false; 
+	
+	
+	
 
 	@Override
 	public void notify(AgentsEnvironment env) {
@@ -22,7 +29,6 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 
 		List<Agent> collidedFishes = this.getCollidedFishes(env);
 		this.score -= collidedFishes.size() * 0.5;
-
 		this.removeEatenAndCreateNewFood(env, eatenFood);
 	}
 
@@ -53,6 +59,14 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 				double distanceToFood = this.module(food.getX() - fish.getX(), food.getY() - fish.getY());
 				if (distanceToFood < minEatDistance) {
 					eatenFood.add(food);
+					if (runTest){
+					if ( fish.getClass().getName() == ABCDrivenAgent.class.getName()){
+						abcFoodcount ++ ;
+						fish.setEatenFoodCount((fish.getEatenFoodCount())+1);
+						System.out.println("food count is:" + abcFoodcount);
+						System.out.println("current fish count:" + fish.getEatenFoodCount());
+					}
+					}
 					continue F;
 				}
 			}
@@ -100,6 +114,11 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 
 	protected double module(double vx1, double vy1) {
 		return Math.sqrt((vx1 * vx1) + (vy1 * vy1));
+	}
+	
+	public static void resetFoodCounts() {
+		abcFoodcount = 0; 
+		
 	}
 
 }

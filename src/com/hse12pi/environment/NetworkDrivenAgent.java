@@ -15,8 +15,6 @@ import com.hse12pi.geneticApproach.neuralnetwork.Threshold;
 
 public class NetworkDrivenAgent extends Agent{
 
-	private static Random random = new Random();
-	
 	private static final double maxSpeed = 4;
 
 	private static final double maxDeltaAngle = 1;
@@ -28,8 +26,6 @@ public class NetworkDrivenAgent extends Agent{
 	private static final double EMPTY = 0;
 
 	private static final double FOOD = 10;
-	
-	private double initialAngle = 0; 
 	
 	//neural network needed vars
 	private volatile NeuralNetwork brain;

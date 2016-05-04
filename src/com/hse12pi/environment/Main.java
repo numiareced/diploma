@@ -59,9 +59,9 @@ public class Main {
 	
 	private static volatile boolean resume = false;
 
-	private static volatile boolean staticFood = true;
-
 	private static volatile boolean regenerateFood = true;
+	
+	private static int foodCount = 0; 
 
 	private static int eatenFoodCount = 0;
 
@@ -116,6 +116,7 @@ public class Main {
 	private static Graphics2D displayEnvironmentCanvas;
 
 	private static boolean evolving = false; 
+	static Timer timer;
 
 	public static void main(String[] args) throws Exception {
 		int environmentWidth = 600;
@@ -341,6 +342,25 @@ public class Main {
 	     });
 
 		stopTest_but.setText("Stop Test");
+		stopTest_but.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	Thread thr = new Thread(){
+			          @Override
+			          public void run(){
+			            try {
+			              Thread.sleep(100);
+			              stopTest_butActionPerformed(evt);
+			              System.out.println("Done");
+			            } catch (Exception e) {
+			              e.printStackTrace();
+			            }
+			            
+			          }
+			        };
+			        thr.start();
+                
+            }
+     });
 
 		javax.swing.GroupLayout controlsPanelLayout = new javax.swing.GroupLayout(controlsPanel);
 		controlsPanel.setLayout(controlsPanelLayout);
@@ -465,7 +485,7 @@ public class Main {
 			// TODO: alert window on this one
 		}else {
 		int agentsCount = Integer.parseInt(agentNum);
-		int foodCount =  Integer.parseInt(foodNum);
+		foodCount =  Integer.parseInt(foodNum);
 		System.out.println("counts: " + agentsCount + " " + foodCount);
 		boolean abcInit = abcAgents_check.isSelected();
 		boolean nnInit = genAgents_check.isSelected();
@@ -509,6 +529,7 @@ public class Main {
 		}else {
 		int agentsCount = Integer.parseInt(agentNum);
 		int foodCount =  Integer.parseInt(foodNum);
+		
 		System.out.println("counts: " + agentsCount + " " + foodCount);
 		boolean abcInit = abcAgents_check.isSelected();
 		boolean nnInit = genAgents_check.isSelected();
@@ -527,13 +548,33 @@ public class Main {
 		    }
 		    int timeValue = Integer.parseInt(timeField);
 		    if (timeValue !=0) {
+		    	timer = new Timer();
+		    	EatenFoodObserver.runTest = true; 
+		    	resetCounters();
+		    	timer.schedule(new TestRunner(), timeValue*1000*60); 
 		    	//start timer here
 		    }
 	    }   
+	 
+	 private static void stopTest_butActionPerformed(ActionEvent evt) {
+		  if (timer != null ){
+			  timer.cancel();
+			  EatenFoodObserver.runTest = false; 
+			  System.out.println("Timer canceled!");
+			  timer = null; 
+		  }
+	 }
 
 	private static int stringToInt(String text) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	private static void resetCounters(){
+		EatenFoodObserver.resetFoodCounts();
+		for ( Agent agent: environment.filter(Agent.class)){
+			agent.setEatenFoodCount(0);
+		}
 	}
 
 	private static void initializeEnvironment(int environmentWidth, int environmentHeight, int agentsCount,
@@ -614,7 +655,7 @@ public class Main {
 				int x = random.nextInt(environmentWidth);
 				int y = random.nextInt(environmentHeight);
 				double direction = random.nextDouble() * 2 * Math.PI;
-				ABCDrivenAgent agent = new ABCDrivenAgent(x, y, direction);
+				ABCDrivenAgent agent = new ABCDrivenAgent(x, y, direction, foodCount);
 				environment.addAgent(agent);
 			}
 			System.out.println("added");

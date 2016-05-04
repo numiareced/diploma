@@ -1,17 +1,16 @@
 package com.hse12pi.environment;
 
-public class TestRunner {
+import java.util.TimerTask;
+
+public class TestRunner extends TimerTask{
 	
- private int timeValue;
- private int totalCount;
- private int abcCount;
- private int dtCount;
- private int nnCount;
- private int abcAverage;
- private int dtAverage;
- private int nnAverage;
- private int abcPercent;
- private int dtPercent;
- private int nnPercent;
+@Override
+public void run() {
+	// TODO Auto-generated method stub
+	System.out.println("Timer Finished!");
+	EatenFoodObserver.runTest = false; 
+	
+	
+}
 
 }
