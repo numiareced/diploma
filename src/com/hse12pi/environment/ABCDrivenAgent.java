@@ -49,12 +49,5 @@ public class ABCDrivenAgent extends Agent {
 		this.setSpeed(randomSpeed);
 
 	}
-	@Override
-	public void setEatenFoodCount(int count){
-		this.eatenFoodCount = count; 
-	}
-	@Override
-	public int getEatenFoodCount(){
-		return this.eatenFoodCount;
-	}
+	
 }

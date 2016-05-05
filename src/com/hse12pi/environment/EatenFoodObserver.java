@@ -14,10 +14,19 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 	private Random random = new Random();
 
 	private double score = 0;
-	
+	private static int totalFoodCount = 0; 
 	private static int abcFoodcount = 0; 
+	private static double abcAverage = 0.0; 
+	private static int abcPercent = 0 ; 
 	
+	private static int dtFoodcount = 0; 
+	private static double dtAverage = 0.0; 
+	private static int dtPercent = 0 ; 
 	public static boolean runTest = false; 
+	
+	public static int getabcFoodcount() {
+		return abcFoodcount; 
+	}
 	
 	
 	
@@ -60,18 +69,58 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 				if (distanceToFood < minEatDistance) {
 					eatenFood.add(food);
 					if (runTest){
+					totalFoodCount ++; 
 					if ( fish.getClass().getName() == ABCDrivenAgent.class.getName()){
 						abcFoodcount ++ ;
 						fish.setEatenFoodCount((fish.getEatenFoodCount())+1);
-						System.out.println("food count is:" + abcFoodcount);
-						System.out.println("current fish count:" + fish.getEatenFoodCount());
+						calcucateAverage(env);
+						calculatePercent();
+						
+						
 					}
+					if ( fish.getClass().getName() == TreeDrivenAgent.class.getName()){
+						dtFoodcount ++ ;
+						fish.setEatenFoodCount((fish.getEatenFoodCount())+1);
+						calcucateAverage(env);
+						calculatePercent();
+					}
+					Main.test_area.setText(" Test information: \n" 
+		                       + "ABC Algorithm total food count:"+ abcFoodcount + "\n" 
+	    		               + "ABC algorithm average:" + abcAverage + "\n" 
+	    		               + "ABC algorithm percent:" + abcPercent + "%" + "\n"
+		                       + "dt Algorithm total food count:"+ dtFoodcount + "\n" 
+	    		               + "dt algorithm average:" + dtAverage + "\n" 
+	    		               + "dt algorithm percent:" + dtPercent + "%" + "\n");
 					}
 					continue F;
 				}
 			}
+
 		}
 		return eatenFood;
+	}
+	private void calcucateAverage(AgentsEnvironment env){
+		abcAverage =0;
+		dtAverage = 0; 
+		int dtQuantity = 0; 
+		int abcQuantity =0 ; 
+		for (ABCDrivenAgent agent:env.filter(ABCDrivenAgent.class)){
+			abcAverage += agent.getEatenFoodCount();
+			abcQuantity ++; 
+		} if (abcAverage!= 0){
+		abcAverage = abcAverage / abcQuantity; 
+		}
+		for (TreeDrivenAgent agent:env.filter(TreeDrivenAgent.class)){
+			dtAverage += agent.getEatenFoodCount();
+			dtQuantity ++; 
+		} if (dtAverage!= 0){
+			dtAverage = dtAverage / abcQuantity; 
+		}
+	}
+	
+	private void calculatePercent(){
+		abcPercent = ( abcFoodcount * 100 )/totalFoodCount; 
+		dtPercent =  ( dtFoodcount * 100)/totalFoodCount;
 	}
 
 	protected void removeEatenAndCreateNewFood(AgentsEnvironment env, List<Food> eatenFood) {
@@ -118,6 +167,8 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver{
 	
 	public static void resetFoodCounts() {
 		abcFoodcount = 0; 
+		abcAverage = 0; 
+		totalFoodCount =0 ; 
 		
 	}
 

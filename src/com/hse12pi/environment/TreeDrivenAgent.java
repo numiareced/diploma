@@ -20,6 +20,7 @@ private static Random random = new Random();
 	private double accSpeed = 0; 
 	private boolean needToSpeedUp = false;
 	private double angle; 
+	private int eatenFoodCount = 0; 
 	DecisionTree tree;
 	public TreeDrivenAgent(double x, double y, double angle) {
  		super(x, y, angle);

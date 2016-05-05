@@ -15,6 +15,8 @@ public class Agent implements AbstractAgent{
 	private static final double maxDeltaAngle = 1;
 
 	protected static final double maxAgentsDistance = 5;
+	
+	private int eatenFoodCount = 0; 
 
 	public Agent(double x, double y, double angle) {
 		this.x = x;
@@ -137,10 +139,11 @@ public class Agent implements AbstractAgent{
 	}
 	
 	public void setEatenFoodCount(int count){
+		this.eatenFoodCount = count; 
 	}
 	
 	public int getEatenFoodCount(){
-		return 0;
+		return this.eatenFoodCount;
 	}
 	
 	
