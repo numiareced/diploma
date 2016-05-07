@@ -28,7 +28,9 @@ public class ABCDrivenAgent extends Agent {
 		output = ABC.optimizeDirection();
 		double deltaAngle = output.get("Angle");
 		double deltaSpeed = output.get("Speed");
-
+		if (deltaSpeed == 0){
+			System.out.println("speed is zero");
+		}
 		deltaSpeed = this.avoidNaNAndInfinity(deltaSpeed);
 		deltaAngle = this.avoidNaNAndInfinity(deltaAngle);
 

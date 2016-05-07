@@ -37,8 +37,8 @@ public class GeneticEnvironmentFitness implements Fitness<GeneticTrainedNetwork,
 			env.addAgent(food);
 		}
 
-		EatenFoodObserver tournamentListener = new EatenFoodObserver() {
-			@Override
+		GeneticFitnessObserver tournamentListener = new GeneticFitnessObserver() {
+		@Override
 			protected void addRandomPieceOfFood(AgentsEnvironment env) {
 				Food newFood = GeneticEnvironmentFitness.this.newPieceOfFood(width, height);
 				env.addAgent(newFood);

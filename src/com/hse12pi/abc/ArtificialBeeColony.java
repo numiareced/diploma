@@ -186,7 +186,7 @@ public class ArtificialBeeColony {
 			if (neighborBee.getNearestEnemy() != null) {
 				neightborSpeed = neighborBee.getNearestEnemy().getSpeed();
 				if (neightborSpeed != 0) {
-					newSpeed = currentSpeed + (0.5 * neightborSpeed * rand.nextDouble());
+					newSpeed = currentSpeed + (2 * neightborSpeed * rand.nextDouble());
 				} else {
 					newSpeed = currentSpeed + (0.5 * rand.nextDouble());
 				}

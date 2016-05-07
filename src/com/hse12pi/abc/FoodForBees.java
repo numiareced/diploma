@@ -131,6 +131,9 @@ public class FoodForBees implements Comparable<FoodForBees> {
 		}
 		this.conflicts = currConflict;
 		this.speed = this.currentAgent.getSpeed();
+		if (this.speed == 0){
+			System.out.println("zero");
+		}
 	}
 
 	protected double pseudoScalarProduct(double vx1, double vy1, double vx2, double vy2) {

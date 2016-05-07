@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -92,6 +93,7 @@ public class Main {
 	private static JFormattedTextField foodNum_field;
 	private static JTextField agentNum_field;
 	private static JTextField timerValue_field;
+	public static JTextArea test_area;
 
 	// buttons
 	private static JButton startEnv_but;
@@ -101,11 +103,11 @@ public class Main {
 	private static JButton stopTest_but;
 
 	// check boxes
-	private static JCheckBox abcAgents_check;
-	private static JCheckBox genAgents_check;
-	private static JCheckBox dtAgents_check;
-	private static JCheckBox agentsAverage_check;
-	private static JCheckBox percent_check;
+	public static JCheckBox abcAgents_check;
+	public static JCheckBox genAgents_check;
+	public static JCheckBox dtAgents_check;
+	public static JCheckBox agentsAverage_check;
+	public static JCheckBox percent_check;
 
 	// separators
 	private static JSeparator sep1;
@@ -166,6 +168,7 @@ public class Main {
 		foodNum_field = new JFormattedTextField(numberFormatter);
 		agentNum_field = new JTextField();
 		timerValue_field = new JTextField();
+		test_area = new JTextArea(); 
 		// checkboxes
 		abcAgents_check = new JCheckBox();
 		genAgents_check = new JCheckBox();
@@ -184,7 +187,7 @@ public class Main {
 
 		// initializing:
 
-		appFrame.setSize(845, 603);
+		appFrame.setSize(845, 703);
 		appFrame.setResizable(false);
 		appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		appFrame.setLayout(new BorderLayout());
@@ -204,13 +207,15 @@ public class Main {
 		appFrame.add(controlsPanel, BorderLayout.EAST);
 		// controlsPanel.setLayout(new GridLayout(11, 1, 5, 5));
 
-		testsPanel.setSize(environmentWidth, 250);
+		testsPanel.setSize(environmentWidth, 300);
 		testsPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+		test_area.setSize(testsPanel.getWidth(), testsPanel.getHeight());
+		testsPanel.add(test_area);
 		appFrame.add(testsPanel, BorderLayout.SOUTH);
 
-		totalFood_label = new JLabel("Eaten food total amount: " + eatenFoodCount, SwingConstants.LEFT);
-		totalTime_label = new JLabel("Time: ", SwingConstants.CENTER);
-		appFrame.add(totalFood_label, BorderLayout.NORTH);
+		//totalFood_label = new JLabel("Eaten food total amount: " + eatenFoodCount, SwingConstants.LEFT);
+		totalTime_label = new JLabel("Time: ", SwingConstants.LEFT);
+		appFrame.add(totalTime_label, BorderLayout.NORTH);
 
 		controlsPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -467,7 +472,7 @@ public class Main {
 		TestsPanelLayout.setHorizontalGroup(TestsPanelLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE));
 		TestsPanelLayout.setVerticalGroup(TestsPanelLayout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 153, Short.MAX_VALUE));
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 253, Short.MAX_VALUE));
 
 	}
 
@@ -552,8 +557,10 @@ public class Main {
 		    	EatenFoodObserver.runTest = true; 
 		    	resetCounters();
 		    	timer.schedule(new TestRunner(), timeValue*1000*60); 
-		    	//start timer here
 		    }
+		    
+		    
+		    
 	    }   
 	 
 	 private static void stopTest_butActionPerformed(ActionEvent evt) {
@@ -583,8 +590,6 @@ public class Main {
 		environment.addListener(new EatenFoodObserver() {
 			protected void addRandomPieceOfFood(AgentsEnvironment env) {
 				if (regenerateFood) {
-					eatenFoodCount++;
-					totalFood_label.setText(Integer.toString(eatenFoodCount));
 					Food food = createRandomFood(env.getWidth(), env.getHeight());
 					env.addAgent(food);
 				}
@@ -623,10 +628,9 @@ public class Main {
 				if (play) {
 					environment.timeStep();
 					count++;
-					if ((eatenFoodCount == 5) || (count == 100)) {
+					if ((count == 100)) {
 						System.out.println("need to envolve");
 						evolvePopulation();
-						eatenFoodCount = 0;
 						count = 0;
 
 					}
