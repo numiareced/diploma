@@ -42,12 +42,6 @@ public class GeneticAlgorithm<C extends Chromosome<C>, T extends Comparable<T>> 
 	private final Fitness<C, T> fitnessFunc;
 
 	private Population<C> population;
-
-	// listeners of genetic algorithm iterations (handle callback afterwards)
-	private final List<IterartionListener<C, T>> iterationListeners = new LinkedList<IterartionListener<C, T>>();
-
-	private boolean terminate = false;
-
 	// number of parental chromosomes, which survive (and move to new
 	// population)
 	private int parentChromosomesSurviveCount = ALL_PARENTAL_CHROMOSOMES;
@@ -88,7 +82,7 @@ public class GeneticAlgorithm<C extends Chromosome<C>, T extends Comparable<T>> 
 		this.population = newPopulation;
 	}
 
-	public void evolve(int count) {
+	/*public void evolve(int count) {
 		this.terminate = false;
 
 		for (int i = 0; i < count; i++) {
@@ -101,15 +95,12 @@ public class GeneticAlgorithm<C extends Chromosome<C>, T extends Comparable<T>> 
 				l.update(this);
 			}
 		}
-	}
+	}*/
 
 	public int getIteration() {
 		return this.iteration;
 	}
 
-	public void terminate() {
-		this.terminate = true;
-	}
 
 	public Population<C> getPopulation() {
 		return this.population;
@@ -129,14 +120,6 @@ public class GeneticAlgorithm<C extends Chromosome<C>, T extends Comparable<T>> 
 
 	public int getParentChromosomesSurviveCount() {
 		return this.parentChromosomesSurviveCount;
-	}
-
-	public void addIterationListener(IterartionListener<C, T> listener) {
-		this.iterationListeners.add(listener);
-	}
-
-	public void removeIterationListener(IterartionListener<C, T> listener) {
-		this.iterationListeners.remove(listener);
 	}
 
 	public T fitness(C chromosome) {

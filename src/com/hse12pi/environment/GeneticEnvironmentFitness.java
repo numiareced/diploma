@@ -12,7 +12,6 @@ public class GeneticEnvironmentFitness implements Fitness<GeneticTrainedNetwork,
 
 	@Override
 	public Double calculate(GeneticTrainedNetwork chromosome) {
-		// TODO maybe, its better to initialize these parameters in constructor
 		final int width = 200;
 		final int height = 200;
 		int agentsCount = 10;

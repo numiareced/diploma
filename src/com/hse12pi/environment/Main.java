@@ -42,7 +42,6 @@ import javax.swing.text.NumberFormatter;
 
 import com.hse12pi.geneticApproach.geneticAlgorithm.Fitness;
 import com.hse12pi.geneticApproach.geneticAlgorithm.GeneticAlgorithm;
-import com.hse12pi.geneticApproach.geneticAlgorithm.IterartionListener;
 import com.hse12pi.geneticApproach.geneticAlgorithm.Population;
 import com.hse12pi.geneticApproach.neuralnetwork.GeneticTrainedNetwork;
 import com.hse12pi.geneticApproach.neuralnetwork.NeuralNetwork;
@@ -603,7 +602,7 @@ public class Main {
 			int gaPopulationSize = 5;
 			int parentalChromosomesSurviveCount = 1;
 			evolving = true; 
-			initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount, null);
+			initializeGeneticAlgorithm(gaPopulationSize, parentalChromosomesSurviveCount);
 			NeuralNetwork brain = ga.getBest();
 			initializeAgents(brain, agentsCount, 2);
 		}
@@ -708,44 +707,18 @@ public class Main {
 		return food;
 	}
 
-	private static void initializeGeneticAlgorithm(int populationSize, int parentalChromosomesSurviveCount,
-			GeneticTrainedNetwork baseNeuralNetwork) {
+	private static void initializeGeneticAlgorithm(int populationSize, int parentalChromosomesSurviveCount) {
 		Population<GeneticTrainedNetwork> brains = new Population<GeneticTrainedNetwork>();
 
 		for (int i = 0; i < (populationSize - 1); i++) {
-			if (baseNeuralNetwork == null) {
-				brains.addChromosome(NetworkDrivenAgent.randomNeuralNetworkBrain());
-			} else {
-				brains.addChromosome(baseNeuralNetwork.mutate());
-			}
+				brains.addChromosome(NetworkDrivenAgent.randomNeuralNetworkBrain());	
 		}
-		if (baseNeuralNetwork != null) {
-			brains.addChromosome(baseNeuralNetwork);
-		} else {
-			brains.addChromosome(NetworkDrivenAgent.randomNeuralNetworkBrain());
-		}
-
 		Fitness<GeneticTrainedNetwork, Double> fit = new GeneticEnvironmentFitness();
 
 		ga = new GeneticAlgorithm<GeneticTrainedNetwork, Double>(brains, fit);
-
-		addGASystemOutIterationListener();
-
 		ga.setParentChromosomesSurviveCount(parentalChromosomesSurviveCount);
 	}
 
-	private static void addGASystemOutIterationListener() {
-		ga.addIterationListener(new IterartionListener<GeneticTrainedNetwork, Double>() {
-			@Override
-			public void update(GeneticAlgorithm<GeneticTrainedNetwork, Double> ga) {
-				GeneticTrainedNetwork bestBrain = ga.getBest();
-				Double fit = ga.fitness(bestBrain);
-				System.out.println(ga.getIteration() + "\t" + fit);
-
-				ga.clearCache();
-			}
-		});
-	}
 
 	private static void setAgentBrains(NeuralNetwork newBrain) {
 		for (NetworkDrivenAgent agent : environment.filter(NetworkDrivenAgent.class)) {
