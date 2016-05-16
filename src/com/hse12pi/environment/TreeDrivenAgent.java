@@ -51,6 +51,10 @@ public synchronized void interact(AgentsEnvironment env) {
 		}
 	}
 
+protected double distanceTo(AbstractAgent food, AbstractAgent agent) {
+	return module(agent.getX() - food.getX(), agent.getY() - food.getY());
+}
+
 public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisionException {
 	
 	Food nearestFood = null;
@@ -73,14 +77,11 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		}
 	}
 	if (nearestFood != null){
-		for (Agent currAgent : environment.filter(Agent.class)) {
-			// agent can see only ahead
-			if ((this != currAgent) && (this.inSight(currAgent))) {
-				double currAgentDist = this.distanceTo(currAgent);
-				if (currAgentDist <= nearestAgentDist) {
-					nearestAgent = currAgent;
-					nearestAgentDist = currAgentDist;
-				}
+		for (Agent agent : environment.filter(Agent.class)) {
+			double currEnemyDist = distanceTo(agent, nearestFood);
+			if (currEnemyDist <= nearestAgentDist) {
+				nearestAgent = agent;
+				nearestAgentDist = currEnemyDist;
 			}
 		}
 		if (nearestAgent !=null){
@@ -167,17 +168,10 @@ public Map<String,Double> decide(AgentsEnvironment environment) throws BadDecisi
 		 //calculatedSpeed = randomspeed;
 		 //calculatedAngle = randomangle; 
 		 Random rand = new Random(); 
-		 if (angle != 360){
-			 angle = angle + 10; 
-			 calculatedSpeed = 0; 
-		 }
-		 else {
 			 //already turned around but no food 
 			 //moving random direction
 			 angle =  random.nextDouble() * 2 * Math.PI;
 			 calculatedSpeed = random.nextDouble()* 4;
-		 }
-		 
 		 output.put("Speed", calculatedSpeed);
 		 output.put("Angle", calculatedAngle);
 		 return output;

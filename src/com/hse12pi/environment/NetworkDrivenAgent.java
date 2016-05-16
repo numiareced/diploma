@@ -32,6 +32,7 @@ public class NetworkDrivenAgent extends Agent{
 	
 	public NetworkDrivenAgent(double x, double y, double angle) {
 		super(x, y, angle);
+		initializeRandomSpeed();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -68,7 +69,14 @@ public class NetworkDrivenAgent extends Agent{
 		this.brain.activate();
 	}
 	
-	public static GeneticTrainedNetwork randomNeuralNetworkBrain() {
+	public void initializeRandomSpeed() {
+		Random rand = new Random();
+		double randomSpeed = rand.nextDouble() * 4;
+		this.setSpeed(randomSpeed);
+
+	}
+	
+/*	public static GeneticTrainedNetwork randomNeuralNetworkBrain() {
 		GeneticTrainedNetwork nn = new GeneticTrainedNetwork(15);
 		for (int i = 0; i < 15; i++) {
 			Threshold f = Threshold.getRandomFunction();
@@ -90,9 +98,33 @@ public class NetworkDrivenAgent extends Agent{
 			}
 		}
 		return nn;
+	}*/
+	
+	public static GeneticTrainedNetwork randomNeuralNetworkBrain() {
+		GeneticTrainedNetwork nn = new GeneticTrainedNetwork(11);
+		for (int i = 0; i < 11; i++) {
+			Threshold f = Threshold.getRandomFunction();
+			nn.setNeuronFunction(i, f, f.getDefaultParams());
+		}
+		for (int i = 0; i < 4; i++) {
+			nn.setNeuronFunction(i, Threshold.LINEAR, Threshold.LINEAR.getDefaultParams());
+		}
+		for (int i = 0; i < 4; i++) {
+			for (int j = 4; j < 11; j++) {
+				nn.addLink(i, j, Math.random());
+			}
+		}
+		for (int i = 4; i < 11; i++) {
+			for (int j = 4; j < 11; j++) {
+				if (i < j) {
+					nn.addLink(i, j, Math.random());
+				}
+			}
+		}
+		return nn;
 	}
 	
-	protected List<Double> createNnInputs(AgentsEnvironment environment) {
+/*	protected List<Double> createNnInputs(AgentsEnvironment environment) {
 		// Find nearest food
 		Food nearestFood = null;
 		double nearestFoodDist = Double.MAX_VALUE;
@@ -122,6 +154,7 @@ public class NetworkDrivenAgent extends Agent{
 				}
 			}
 		}
+		
 
 		List<Double> nnInputs = new LinkedList<Double>();
 
@@ -139,6 +172,7 @@ public class NetworkDrivenAgent extends Agent{
 			double foodDirectionCosTeta =
 					Math.signum(this.pseudoScalarProduct(rx, ry, foodDirectionVectorX, foodDirectionVectorY))
 							* this.cosTeta(rx, ry, foodDirectionVectorX, foodDirectionVectorY);
+			double nearestEnemyDist = calculateNearestEnemy(environment, nearestFood);
 
 			nnInputs.add(FOOD);
 			nnInputs.add(nearestFoodDist);
@@ -169,7 +203,98 @@ public class NetworkDrivenAgent extends Agent{
 			nnInputs.add(0.0);
 		}
 		return nnInputs;
-	}
+	}*/
 	
+	
+	protected List<Double> createNnInputs(AgentsEnvironment environment) {
+		// Find nearest food
+		Food nearestFood = null;
+		double nearestFoodDist = Double.MAX_VALUE;
+
+		for (Food currFood : environment.filter(Food.class)) {
+			// agent can see only ahead
+			if (this.inSight(currFood)) {
+				double currFoodDist = this.distanceTo(currFood);
+				if ((nearestFood == null) || (currFoodDist <= nearestFoodDist)) {
+					nearestFood = currFood;
+					nearestFoodDist = currFoodDist;
+				}
+			}
+		}
+
+		Agent nearestAgent = null;
+		double nearestAgentDist = maxAgentsDistance;
+		
+		List<Double> nnInputs = new LinkedList<Double>();
+
+		double rx = this.getRx();
+		double ry = this.getRy();
+
+		double x = this.getX();
+		double y = this.getY();
+
+		if (nearestFood != null) {
+			double foodDirectionVectorX = nearestFood.getX() - x;
+			double foodDirectionVectorY = nearestFood.getY() - y;
+			for (Agent agent : environment.filter(Agent.class)) {
+				double currEnemyDist = distanceTo(agent, nearestFood);
+				if (currEnemyDist <= nearestAgentDist) {
+					nearestAgent = agent;
+					nearestAgentDist = currEnemyDist;
+				}
+			}
+
+			// left/right cos
+			double foodDirectionCosTeta =
+					Math.signum(this.pseudoScalarProduct(rx, ry, foodDirectionVectorX, foodDirectionVectorY))
+							* this.cosTeta(rx, ry, foodDirectionVectorX, foodDirectionVectorY);
+			
+			
+
+			nnInputs.add(nearestFoodDist);
+			nnInputs.add(foodDirectionCosTeta);
+			if (nearestAgent != null) {
+				double agentDirectionVectorX = nearestAgent.getX() - x;
+				double agentDirectionVectorY = nearestAgent.getY() - y;
+
+				// left/right cos
+				double agentDirectionCosTeta =
+						Math.signum(this.pseudoScalarProduct(rx, ry, agentDirectionVectorX, agentDirectionVectorY))
+								* this.cosTeta(rx, ry, agentDirectionVectorX, agentDirectionVectorY);
+
+				nnInputs.add(nearestAgentDist);
+				nnInputs.add(agentDirectionCosTeta);
+
+			} else {
+				nnInputs.add(0.0);
+				nnInputs.add(0.0);
+			}
+
+
+		} else {
+			nnInputs.add(0.0);
+			nnInputs.add(0.0);
+			nnInputs.add(0.0);
+			nnInputs.add(0.0);
+		}
+
+		
+		return nnInputs;
+	}
+	private double calculateNearestEnemy(AgentsEnvironment env, Food f) {
+		Agent nearestAgent = null;
+		double nearestAgentDist = Double.MAX_VALUE;
+		for (Agent agent : env.filter(Agent.class)) {
+			double currEnemyDist = distanceTo(agent, f);
+			if (currEnemyDist <= nearestAgentDist) {
+				nearestAgent = agent;
+				nearestAgentDist = currEnemyDist;
+			}
+		}
+		return  nearestAgentDist;
+	}
+	protected double distanceTo(AbstractAgent food, AbstractAgent agent) {
+		return module(agent.getX() - food.getX(), agent.getY() - food.getY());
+	}
 
 }

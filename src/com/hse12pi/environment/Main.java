@@ -1,43 +1,27 @@
 package com.hse12pi.environment;
-
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.text.NumberFormat;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.prefs.Preferences;
 
-import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.text.NumberFormatter;
 
 import com.hse12pi.geneticApproach.geneticAlgorithm.Fitness;
@@ -45,7 +29,6 @@ import com.hse12pi.geneticApproach.geneticAlgorithm.GeneticAlgorithm;
 import com.hse12pi.geneticApproach.geneticAlgorithm.Population;
 import com.hse12pi.geneticApproach.neuralnetwork.GeneticTrainedNetwork;
 import com.hse12pi.geneticApproach.neuralnetwork.NeuralNetwork;
-
 public class Main {
 
 	private static AgentsEnvironment environment;
@@ -93,6 +76,7 @@ public class Main {
 	private static JTextField agentNum_field;
 	private static JTextField timerValue_field;
 	public static JTextArea test_area;
+	public static JTextArea min_area;
 
 	// buttons
 	private static JButton startEnv_but;
@@ -111,13 +95,41 @@ public class Main {
 	// separators
 	private static JSeparator sep1;
 	private static JSeparator sep2;
+	
+	//scrolls
+	private static JScrollPane jScrollPane1;
+	private static JScrollPane jScrollPane2;
 
 	private static BufferedImage displayEnvironmentBufferedImage;
 
 	private static Graphics2D displayEnvironmentCanvas;
 
+	//for testing
 	private static boolean evolving = false; 
-	static Timer timer;
+	static Timer timer2;
+	static java.util.Timer timer;
+	
+	//values
+	public static int totalFoodCount = 0;
+	public static int abcFoodcount = 0;
+	public static double abcAverage = 0.0;
+	public static int abcPercent = 0;
+
+	public static int dtFoodcount = 0;
+	public static double dtAverage = 0.0;
+	public static int dtPercent = 0;
+	
+	public static int nnFoodcount = 0; 
+	public static double nnAverage = 0.0; 
+	public static int nnPercent = 0; 
+	public static boolean runTest = false;
+
+	public static double  abcAverageSpeed = 0;
+	public static double  dtAverageSpeed = 0;
+	public static double  nnAverageSpeed = 0; 
+	
+	
+	
 
 	public static void main(String[] args) throws Exception {
 		int environmentWidth = 600;
@@ -168,6 +180,7 @@ public class Main {
 		agentNum_field = new JTextField();
 		timerValue_field = new JTextField();
 		test_area = new JTextArea(); 
+		min_area = new JTextArea();
 		// checkboxes
 		abcAgents_check = new JCheckBox();
 		genAgents_check = new JCheckBox();
@@ -183,7 +196,9 @@ public class Main {
 		// separators
 		sep1 = new JSeparator();
 		sep2 = new JSeparator();
-
+		//scrools
+		jScrollPane1 = new JScrollPane();
+		jScrollPane2 = new JScrollPane();
 		// initializing:
 
 		appFrame.setSize(845, 703);
@@ -208,9 +223,16 @@ public class Main {
 
 		testsPanel.setSize(environmentWidth, 300);
 		testsPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		test_area.setSize(testsPanel.getWidth(), testsPanel.getHeight());
-		testsPanel.add(test_area);
+		//GroupLayout testsPanelLayout = new javax.swing.GroupLayout(testsPanel);
+		testsPanel.setLayout(new BorderLayout());
+		test_area.setSize(testsPanel.getWidth()/2, testsPanel.getHeight());
+		jScrollPane1.setViewportView(test_area);
+		min_area.setSize(testsPanel.getWidth()/2, testsPanel.getHeight());
+		jScrollPane2.setViewportView(min_area);
+		test_area.setText("tests");
+		test_area.setEditable(false);
 		appFrame.add(testsPanel, BorderLayout.SOUTH);
+		
 
 		//totalFood_label = new JLabel("Eaten food total amount: " + eatenFoodCount, SwingConstants.LEFT);
 		totalTime_label = new JLabel("Time: ", SwingConstants.LEFT);
@@ -468,10 +490,82 @@ public class Main {
 
 		javax.swing.GroupLayout TestsPanelLayout = new javax.swing.GroupLayout(testsPanel);
 		testsPanel.setLayout(TestsPanelLayout);
-		TestsPanelLayout.setHorizontalGroup(TestsPanelLayout
+		/*TestsPanelLayout.setHorizontalGroup(TestsPanelLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE));
 		TestsPanelLayout.setVerticalGroup(TestsPanelLayout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 253, Short.MAX_VALUE));
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 253, Short.MAX_VALUE));*/
+		TestsPanelLayout.setHorizontalGroup(
+	            TestsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	            .addGroup(TestsPanelLayout.createSequentialGroup()
+	                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+	                .addComponent(jScrollPane2))
+	        );
+	        TestsPanelLayout.setVerticalGroup(
+	            TestsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 253, testsPanel.getHeight())
+	            .addComponent(jScrollPane2)
+	        );
+	        
+	      /*  min_area.setText("ssssssss\n"
+	        		+ "lllllllllllllll"
+	        		+ "lllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllllll\nllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss\n"
+	        		+ "lllllllllllllll"
+	        		+ "lllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllll\nllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;\n;;;;;;;;;;;;;;======sss\n"
+	        		+ "lllllllllllllll"
+	        		+ "lllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllll\nllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllll\nll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss"
+	        		+ "lllllllll\nllllll"
+	        		+ "lllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "llllllll\nlllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss"
+	        		+ "lllllllllllllll"
+	        		+ "lllllllllll"
+	        		+ "llllllll\nlllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllll\nllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllll\nllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss\n"
+	        		+ "lllllllllllllll"
+	        		+ "llllllll\nlll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss\n"
+	        		+ "lllllllllllllll"
+	        		+ "lllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllll"
+	        		+ "lllllllllllllllllllllllllllll"
+	        		+ ";;;;;;;;;;;;;;;;;;;;;;;;;======sss\n");*/
+	   
+	 
 
 	}
 
@@ -552,15 +646,141 @@ public class Main {
 		    }
 		    int timeValue = Integer.parseInt(timeField);
 		    if (timeValue !=0) {
-		    	timer = new Timer();
+		    	timer = new java.util.Timer();
 		    	EatenFoodObserver.runTest = true; 
 		    	resetCounters();
+		    	 
 		    	timer.schedule(new TestRunner(), timeValue*1000*60); 
+		    	timer2=new Timer( 1000*60, new ActionListener()
+		    	  {
+		    		int i= 1;
+		    	    public void actionPerformed(ActionEvent e)
+		    	    {
+		    	    min_area.append(i + " minute info: \n");
+		    	    min_area.append(" Total food count:" + totalFoodCount +" \n");
+					if (abcAgents_check.isSelected()) {
+						min_area.append("ABC Algorithm total food count:" + abcFoodcount + "\n");
+					}
+					if (dtAgents_check.isSelected()) {
+						min_area.append("dt Algorithm total food count:" + dtFoodcount + "\n");
+					}
+					if (genAgents_check.isSelected()){
+						min_area.append("Genetic Algorithm total food count:" + nnFoodcount + "\n");
+					}
+					if (agentsAverage_check.isSelected()){
+						min_area.append("ABC algorithm average:" + abcAverage + "\n");
+						min_area.append("DT algorithm average:" + dtAverage + "\n");
+						min_area.append("GEN+NN algorithm average:" + nnAverage + "\n");
+						min_area.append("ABC average speed:" + abcAverageSpeed + "\n");
+						min_area.append("DT average speed:" + dtAverageSpeed + "\n");
+						min_area.append("GEN+NN average speed:" + nnAverageSpeed + "\n");
+						
+					}
+					if (percent_check.isSelected()){
+						min_area.append("ABC algorithm percent:" + abcPercent + "%" + "\n");
+						min_area.append("DT algorithm  percent:" + dtPercent + "%" + "\n");
+						min_area.append("GEN+NN algorithm  percent:" + nnPercent + "%" + "\n");
+					}
+
+		    	    i++;
+		    	    
+		    		totalFoodCount = 0;
+		    		abcFoodcount = 0;
+		    		abcAverage = 0.0;
+		    		abcPercent = 0;
+
+		    		dtFoodcount = 0;
+		    		dtAverage = 0.0;
+		    		dtPercent = 0;
+		    		
+		    		nnFoodcount = 0; 
+		    		nnAverage = 0.0; 
+		    		nnPercent = 0; 
+		    		runTest = false;
+
+		    		abcAverageSpeed = 0;
+		    		dtAverageSpeed = 0;
+		    		nnAverageSpeed = 0; 
+		    		if (i > timeValue){
+		    			timer2.stop();
+		    		}
+		    	    }
+		    	    
+		    	    
+		    	  } );
+		    	timer2.start();
+	   
 		    }
 		    
 		    
 		    
 	    }   
+	 
+	 public static void calculateAverage(AgentsEnvironment env) {
+			abcAverage = 0;
+			dtAverage = 0;
+			nnAverage = 0; 
+			int dtQuantity = 0;
+			int abcQuantity = 0;
+			int nnQuantity = 0; 
+			for (ABCDrivenAgent agent : env.filter(ABCDrivenAgent.class)) {
+				abcAverage += agent.getEatenFoodCount();
+				abcQuantity++;
+			}
+			if (abcAverage != 0) {
+				abcAverage = abcAverage / abcQuantity;
+			}
+			for (TreeDrivenAgent agent : env.filter(TreeDrivenAgent.class)) {
+				dtAverage += agent.getEatenFoodCount();
+				dtQuantity++;
+			}
+			if (dtAverage != 0) {
+				dtAverage = dtAverage / dtQuantity;
+			}
+			for (NetworkDrivenAgent agent : env.filter(NetworkDrivenAgent.class)) {
+				nnAverage += agent.getEatenFoodCount();
+				nnQuantity++;
+			}
+			if (nnAverage != 0) {
+				nnAverage = nnAverage / nnQuantity;
+			}
+		}
+	 
+	 public static void calculateAverageSpeed(AgentsEnvironment env){
+			abcAverageSpeed = 0;
+			dtAverageSpeed = 0;
+			nnAverageSpeed = 0; 
+			int dtQuantity = 0;
+			int abcQuantity = 0;
+			int nnQuantity = 0; 
+			for (ABCDrivenAgent agent : env.filter(ABCDrivenAgent.class)) {
+				abcAverageSpeed += agent.getSpeed();
+				abcQuantity++;
+			}
+			if (abcAverageSpeed != 0) {
+				abcAverageSpeed = abcAverageSpeed / abcQuantity;
+			}
+			for (TreeDrivenAgent agent : env.filter(TreeDrivenAgent.class)) {
+				dtAverageSpeed += agent.getSpeed();
+				dtQuantity++;
+			}
+			if (dtAverageSpeed != 0) {
+				dtAverageSpeed = dtAverageSpeed / dtQuantity;
+			}
+			for (NetworkDrivenAgent agent : env.filter(NetworkDrivenAgent.class)) {
+				nnAverageSpeed += agent.getSpeed();
+				nnQuantity++;
+			}
+			if (nnAverageSpeed != 0) {
+				nnAverageSpeed = nnAverageSpeed / nnQuantity;
+			}
+		}
+
+		public static void calculatePercent() {
+			abcPercent = (abcFoodcount * 100) / totalFoodCount;
+			dtPercent = (dtFoodcount * 100) / totalFoodCount;
+			nnPercent = (nnFoodcount *100)/totalFoodCount; 
+		}
 	 
 	 private static void stopTest_butActionPerformed(ActionEvent evt) {
 		  if (timer != null ){
@@ -627,7 +847,7 @@ public class Main {
 				if (play) {
 					environment.timeStep();
 					count++;
-					if ((count == 100)) {
+					if ((count == 50)) {
 						System.out.println("need to envolve");
 						evolvePopulation();
 						count = 0;

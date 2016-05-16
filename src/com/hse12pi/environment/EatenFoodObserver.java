@@ -1,9 +1,13 @@
 package com.hse12pi.environment;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.Timer;
 
 public class EatenFoodObserver implements AgentsEnvironmentObserver {
 
@@ -75,8 +79,10 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 					eatenFood.add(food);
 					if (runTest) {
 						totalFoodCount++;
+						Main.totalFoodCount ++;
 						if (fish.getClass().getName() == ABCDrivenAgent.class.getName()) {
 							abcFoodcount++;
+							Main.abcFoodcount ++;
 							fish.setEatenFoodCount((fish.getEatenFoodCount()) + 1);
 							calcucateAverage(env);
 							calculateAverageSpeed(env);
@@ -85,6 +91,7 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 						}
 						if (fish.getClass().getName() == TreeDrivenAgent.class.getName()) {
 							dtFoodcount++;
+							Main.dtFoodcount ++;
 							fish.setEatenFoodCount((fish.getEatenFoodCount()) + 1);
 							calcucateAverage(env);
 							calculateAverageSpeed(env);
@@ -92,6 +99,7 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 						}
 						if (fish.getClass().getName() == NetworkDrivenAgent.class.getName()) {
 							nnFoodcount++;
+							Main.nnFoodcount ++;
 							fish.setEatenFoodCount((fish.getEatenFoodCount()) + 1);
 							calcucateAverage(env);
 							calculatePercent();
@@ -115,12 +123,18 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 							Main.test_area.append("ABC average speed:" + abcAverageSpeed + "\n");
 							Main.test_area.append("DT average speed:" + dtAverageSpeed + "\n");
 							Main.test_area.append("GEN+NN average speed:" + nnAverageSpeed + "\n");
+							Main.calculateAverage(env);
+							Main.calculatePercent();
+							Main.calculateAverageSpeed(env);
 							
 						}
 						if (Main.percent_check.isSelected()){
 							Main.test_area.append("ABC algorithm percent:" + abcPercent + "%" + "\n");
 							Main.test_area.append("DT algorithm  percent:" + dtPercent + "%" + "\n");
 							Main.test_area.append("GEN+NN algorithm  percent:" + nnPercent + "%" + "\n");
+							Main.abcPercent = abcPercent; 
+							Main.dtPercent = dtPercent; 
+							Main.nnPercent = nnPercent; 
 						}
 
 					}
@@ -151,14 +165,14 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 			dtQuantity++;
 		}
 		if (dtAverage != 0) {
-			dtAverage = dtAverage / abcQuantity;
+			dtAverage = dtAverage / dtQuantity;
 		}
 		for (NetworkDrivenAgent agent : env.filter(NetworkDrivenAgent.class)) {
 			nnAverage += agent.getEatenFoodCount();
 			nnQuantity++;
 		}
 		if (nnAverage != 0) {
-			nnAverage = nnAverage / abcQuantity;
+			nnAverage = nnAverage / nnQuantity;
 		}
 	}
 	
@@ -181,14 +195,14 @@ public class EatenFoodObserver implements AgentsEnvironmentObserver {
 			dtQuantity++;
 		}
 		if (dtAverageSpeed != 0) {
-			dtAverageSpeed = dtAverageSpeed / abcQuantity;
+			dtAverageSpeed = dtAverageSpeed / dtQuantity;
 		}
 		for (NetworkDrivenAgent agent : env.filter(NetworkDrivenAgent.class)) {
 			nnAverageSpeed += agent.getSpeed();
 			nnQuantity++;
 		}
 		if (nnAverageSpeed != 0) {
-			nnAverageSpeed = nnAverageSpeed / abcQuantity;
+			nnAverageSpeed = nnAverageSpeed / nnQuantity;
 		}
 	}
 
